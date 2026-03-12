@@ -229,7 +229,17 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
   </div>
 </div>
 
-<!-- SHELL -->
+<!-- Confirmation Modal -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="width:min(360px,88vw);background:rgba(20,20,24,.98);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:2rem 1.8rem 1.6rem;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:rise .22s ease both;">
+    <div style="font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem" id="confirm-eyebrow">Confirm Action</div>
+    <div style="font-size:.92rem;color:var(--white);line-height:1.55;margin-bottom:1.4rem" id="confirm-msg"></div>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end;">
+      <button class="a-btn" id="confirm-cancel-btn">Cancel</button>
+      <button class="a-btn danger" id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
 <div id="admin-shell">
   <aside class="sidebar">
     <div class="sb-brand">
@@ -645,7 +655,22 @@ function toast(msg, type) {
   setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),320); },2800);
 }
 
-setInterval(()=>{
+// ── Confirmation modal (replaces all confirm() calls) ────
+function showConfirm(msg, onOk, { eyebrow='Confirm Action', okLabel='Confirm', danger=true } = {}) {
+  const modal = document.getElementById('confirm-modal');
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-eyebrow').textContent = eyebrow;
+  const okBtn = document.getElementById('confirm-ok-btn');
+  okBtn.textContent = okLabel;
+  okBtn.className = 'a-btn ' + (danger ? 'danger' : 'primary');
+  modal.style.display = 'flex';
+  const close = () => { modal.style.display = 'none'; okBtn.removeEventListener('click', handleOk); document.getElementById('confirm-cancel-btn').removeEventListener('click', close); };
+  const handleOk = () => { close(); onOk(); };
+  okBtn.addEventListener('click', handleOk);
+  document.getElementById('confirm-cancel-btn').addEventListener('click', close);
+}
+
+
   const d=new Date();
   document.getElementById('topbar-time').textContent =
     d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+
@@ -842,9 +867,10 @@ document.getElementById('export-views-btn').addEventListener('click',async()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nova-views-${todayKey()}.csv`;a.click();
   toast('Exported','green');}catch(e){toast('Export failed','red');}
 });
-document.getElementById('reset-views-btn').addEventListener('click',async()=>{
-  if(!confirm('Reset all view counts in Redis?'))return;
-  try{await api('POST','/api/views/reset',{user:SESSION.user,pass:SESSION.pass});toast('Counter reset','red');renderViews();}catch(e){toast(e.message,'red');}
+document.getElementById('reset-views-btn').addEventListener('click',()=>{
+  showConfirm('Reset all view counts in Redis? This cannot be undone.', async () => {
+    try{await api('POST','/api/views/reset',{user:SESSION.user,pass:SESSION.pass});toast('Counter reset','red');renderViews();}catch(e){toast(e.message,'red');}
+  });
 });
 
 // ── HEALTH ───────────────────────────────────────────────
@@ -956,15 +982,16 @@ window.publishBroadcast=async function(){
   }catch(e){toast(e.message,'red');}
   finally{btn.disabled=false;btn.textContent='Publish to All Users';}
 };
-window.clearBroadcast=async function(){
-  if(!confirm('Remove the active broadcast?'))return;
-  try{
-    await api('POST','/api/broadcast',{user:SESSION.user,pass:SESSION.pass,text:''});
-    toast('Broadcast cleared');
-    updateBcActiveUI({});
-    document.getElementById('ov-bc').textContent='OFF';
-    document.getElementById('ov-bc').style.color='';
-  }catch(e){toast(e.message,'red');}
+window.clearBroadcast=function(){
+  showConfirm('Remove the active broadcast? All users will stop seeing it.', async () => {
+    try{
+      await api('POST','/api/broadcast',{user:SESSION.user,pass:SESSION.pass,text:''});
+      toast('Broadcast cleared');
+      updateBcActiveUI({});
+      document.getElementById('ov-bc').textContent='OFF';
+      document.getElementById('ov-bc').style.color='';
+    }catch(e){toast(e.message,'red');}
+  });
 };
 
 // ── BLOCKED URLS ─────────────────────────────────────────
@@ -1016,18 +1043,18 @@ document.getElementById('add-block-btn').addEventListener('click',async()=>{
 });
 
 window.unblockUrl=async function(url){
-  if(!confirm(`Unblock "${url}"?`))return;
   try{await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url});toast(`"${url}" unblocked`,'green');renderBlocked();}
   catch(e){toast(e.message,'red');}
 };
 
-window.clearAllBlocks=async function(){
-  if(!confirm('Clear ALL blocked URLs from Redis?'))return;
-  try{
-    const list=await fetch(`/api/blocked/admin?${authQ()}`).then(r=>r.json());
-    for(const b of list) await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url:b.url});
-    toast('All blocks cleared','green');renderBlocked();
-  }catch(e){toast(e.message,'red');}
+window.clearAllBlocks=function(){
+  showConfirm('Clear ALL blocked URLs from Redis? This cannot be undone.', async () => {
+    try{
+      const list=await fetch(`/api/blocked/admin?${authQ()}`).then(r=>r.json());
+      for(const b of list) await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url:b.url});
+      toast('All blocks cleared','green');renderBlocked();
+    }catch(e){toast(e.message,'red');}
+  });
 };
 
 // ── ADMINS ───────────────────────────────────────────────
@@ -1042,10 +1069,11 @@ async function renderAdmins(){
     ).join('');
   }catch(e){toast('Could not load admins','red');}
 }
-window.removeAdmin=async function(user){
-  if(!confirm(`Remove admin "${user}"?`))return;
-  try{await api('DELETE',`/api/admin/accounts/${encodeURIComponent(user)}`,{user:SESSION.user,pass:SESSION.pass});renderAdmins();toast('Admin removed','red');}
-  catch(e){toast(e.message,'red');}
+window.removeAdmin=function(user){
+  showConfirm(`Remove admin "${user}"? They will lose all access immediately.`, async () => {
+    try{await api('DELETE',`/api/admin/accounts/${encodeURIComponent(user)}`,{user:SESSION.user,pass:SESSION.pass});renderAdmins();toast('Admin removed','red');}
+    catch(e){toast(e.message,'red');}
+  });
 };
 document.getElementById('add-admin-btn').addEventListener('click',async()=>{
   const newUser=document.getElementById('new-admin-user').value.trim();
@@ -1064,10 +1092,11 @@ document.getElementById('change-pass-btn').addEventListener('click',async()=>{
   try{await api('POST','/api/admin/password',{user:SESSION.user,pass:SESSION.pass,newPass:np});SESSION.pass=np;document.getElementById('new-pass').value='';document.getElementById('confirm-pass').value='';toast('Password updated','green');}
   catch(e){toast(e.message,'red');}
 });
-document.getElementById('factory-reset-btn').addEventListener('click',async()=>{
-  if(!confirm('Factory reset ALL data from Redis?'))return;
-  try{await api('POST','/api/admin/factory-reset',{user:SESSION.user,pass:SESSION.pass});SESSION.pass='1234';toast('Factory reset complete','red');renderOverview();}
-  catch(e){toast(e.message,'red');}
+document.getElementById('factory-reset-btn').addEventListener('click',()=>{
+  showConfirm('Factory reset ALL data from Redis? This wipes all admins, views, blocks, and activity. Cannot be undone.', async () => {
+    try{await api('POST','/api/admin/factory-reset',{user:SESSION.user,pass:SESSION.pass});SESSION.pass='1234';toast('Factory reset complete','red');renderOverview();}
+    catch(e){toast(e.message,'red');}
+  }, {okLabel:'Reset Everything', danger:true});
 });
 window.setAdminTheme=function(theme){
   const themes={default:['#668','#446'],blue:['#46a','#248'],green:['#464','#242'],purple:['#846','#624']};
@@ -1288,13 +1317,14 @@ window.confirmTotpSetup=async function(){
     renderTotpStatus();
   }catch(e){document.getElementById('totp-modal-err').textContent=e.message||'Invalid code';}
 };
-window.disableTotp=async function(){
-  if(!confirm('Disable 2FA for your account?'))return;
-  try{
-    await api('POST','/api/admin/totp/disable',{user:SESSION.user,pass:SESSION.pass});
-    toast('2FA disabled','yellow');
-    renderTotpStatus();
-  }catch(e){toast(e.message,'red');}
+window.disableTotp=function(){
+  showConfirm('Disable 2FA for your account? You will only need your password to log in.', async () => {
+    try{
+      await api('POST','/api/admin/totp/disable',{user:SESSION.user,pass:SESSION.pass});
+      toast('2FA disabled','yellow');
+      renderTotpStatus();
+    }catch(e){toast(e.message,'red');}
+  });
 };
 
 // ── Security Settings ─────────────────────────────────────
