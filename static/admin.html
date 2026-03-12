@@ -440,7 +440,7 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
       <div class="a-section">Security</div>
       <div class="a-block">
         <div class="a-row">
-          <div><div class="a-label">Change Password</div><div class="a-desc">Update the owner account password</div></div>
+          <div><div class="a-label">Change Password</div><div class="a-desc">Update your account password</div></div>
           <div class="form-row">
             <input class="a-input" id="new-pass" type="password" placeholder="New password" style="max-width:180px"/>
             <input class="a-input" id="confirm-pass" type="password" placeholder="Confirm" style="max-width:180px"/>
@@ -871,7 +871,6 @@ document.getElementById('add-admin-btn').addEventListener('click',async()=>{
 
 // ── SETTINGS ─────────────────────────────────────────────
 document.getElementById('change-pass-btn').addEventListener('click',async()=>{
-  if(SESSION.role!=='owner'){toast('Only owner can change password','red');return;}
   const np=document.getElementById('new-pass').value,cp=document.getElementById('confirm-pass').value;
   if(!np){toast('Enter new password','red');return;}if(np!==cp){toast('Passwords do not match','red');return;}if(np.length<4){toast('Min 4 chars','red');return;}
   try{await api('POST','/api/admin/password',{user:SESSION.user,pass:SESSION.pass,newPass:np});SESSION.pass=np;document.getElementById('new-pass').value='';document.getElementById('confirm-pass').value='';toast('Password updated','green');}
