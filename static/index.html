@@ -26,6 +26,21 @@
 	<div class="amb a2"></div>
 	<div id="toast-container"></div>
 
+	<!-- ══ Broadcast: maintenance overlay (full-screen) ══ -->
+	<div id="maintenance-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:#0a0a14;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;padding:2rem;text-align:center;">
+		<div style="font-size:3rem">🔧</div>
+		<div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.18em;color:#fafafa;">UNDER MAINTENANCE</div>
+		<div id="maintenance-msg" style="font-size:.85rem;color:#a1a1aa;max-width:420px;line-height:1.6;"></div>
+		<div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:#52525b;margin-top:.5rem;">Please check back soon</div>
+	</div>
+
+	<!-- ══ Broadcast: top banner (normal announcements) ══ -->
+	<div id="broadcast-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:8000;background:rgba(251,191,36,0.12);border-bottom:1px solid rgba(251,191,36,0.3);padding:.55rem 1.2rem;align-items:center;justify-content:center;gap:.75rem;backdrop-filter:blur(12px);">
+		<span style="font-size:.9rem;">📢</span>
+		<span id="broadcast-banner-text" style="font-size:.78rem;color:rgba(251,191,36,0.95);letter-spacing:.04em;flex:1;text-align:center;"></span>
+		<button id="broadcast-banner-close" style="background:none;border:none;color:rgba(251,191,36,0.6);font-size:1.1rem;cursor:pointer;padding:.1rem .4rem;line-height:1;flex-shrink:0;" title="Dismiss">✕</button>
+	</div>
+
 	<div id="whats-new-overlay" class="hidden">
 		<div class="whats-new-modal">
 			<div class="wn-badge">What's New</div>
