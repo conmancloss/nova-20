@@ -1,0 +1,10 @@
+{
+  "version": "1.3.0",
+  "title": "WELCOME TO NOVA",
+  "items": [
+    { "icon": "⭐️", "text": "New App" },
+    { "icon": "🔍", "text": "New updated proxy" },
+    { "icon": "", "text": "New UI" },
+    { "icon": "", "text": "New light mode" },
+  ]
+}

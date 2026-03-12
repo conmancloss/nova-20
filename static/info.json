@@ -1,0 +1,11 @@
+{
+  "name": "Nova",
+  "version": "1.0.0",
+  "tagline": "Private Browser",
+  "description": "Nova is a private, unrestricted web browser powered by Ultraviolet (UV).",
+  "meta": [
+    { "label": "Engine",    "value": "Ultraviolet (UV)" },
+    { "label": "Transport", "value": "Bare Server" },
+    { "label": "Built",     "value": "2026" }
+  ]
+}
