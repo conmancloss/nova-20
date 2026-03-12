@@ -710,34 +710,16 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
         </div>
       </div>
 
-      <div class="a-section">CSS Injection</div>
-      <div class="a-block">
-        <div class="a-row" style="flex-direction:column;align-items:flex-start;gap:.6rem;">
-          <div><div class="a-label">Custom CSS</div><div class="a-desc">Injected into every Nova page — use to override styles site-wide</div></div>
-          <textarea class="a-textarea" id="set-css" style="min-height:120px;font-family:monospace;font-size:.74rem;" placeholder="/* your CSS here */"></textarea>
-          <button class="a-btn primary" style="align-self:flex-end" onclick="saveInjections()">Save CSS</button>
-        </div>
-      </div>
-
-      <div class="a-section">JS Injection</div>
-      <div class="a-block">
-        <div class="a-row" style="flex-direction:column;align-items:flex-start;gap:.6rem;">
-          <div><div class="a-label">Custom JS</div><div class="a-desc">Runs on every Nova page load — use carefully</div></div>
-          <textarea class="a-textarea" id="set-js" style="min-height:120px;font-family:monospace;font-size:.74rem;" placeholder="// your JS here"></textarea>
-          <button class="a-btn primary" style="align-self:flex-end" onclick="saveInjections()">Save JS</button>
-        </div>
-      </div>
-
       <div class="a-section">Console Theme</div>
       <div class="a-block">
         <div class="a-row">
           <div><div class="a-label">Admin Panel Accent</div></div>
           <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
-            <button class="a-btn" data-theme="default" onclick="setAdminTheme('default')">Default</button>
-            <button class="a-btn" data-theme="blue" onclick="setAdminTheme('blue')">Blue</button>
-            <button class="a-btn" data-theme="green" onclick="setAdminTheme('green')">Green</button>
-            <button class="a-btn" data-theme="purple" onclick="setAdminTheme('purple')">Purple</button>
-            <button class="a-btn" data-theme="red" onclick="setAdminTheme('red')">Red</button>
+            <button class="a-btn theme-btn" data-theme="default" onclick="setAdminTheme('default')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7a7aaa;margin-right:.4rem;vertical-align:middle"></span>Default</button>
+            <button class="a-btn theme-btn" data-theme="blue" onclick="setAdminTheme('blue')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4488cc;margin-right:.4rem;vertical-align:middle"></span>Blue</button>
+            <button class="a-btn theme-btn" data-theme="green" onclick="setAdminTheme('green')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#44aa66;margin-right:.4rem;vertical-align:middle"></span>Green</button>
+            <button class="a-btn theme-btn" data-theme="purple" onclick="setAdminTheme('purple')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9966cc;margin-right:.4rem;vertical-align:middle"></span>Purple</button>
+            <button class="a-btn theme-btn" data-theme="red" onclick="setAdminTheme('red')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#cc4444;margin-right:.4rem;vertical-align:middle"></span>Red</button>
           </div>
         </div>
       </div>
@@ -1610,8 +1592,6 @@ async function loadSettings() {
     if (s.maintenanceMode !== undefined) {
       document.getElementById('maint-toggle').checked = !!s.maintenanceMode;
     }
-    if (s.cssInjection !== undefined) document.getElementById('set-css').value = s.cssInjection;
-    if (s.jsInjection !== undefined) document.getElementById('set-js').value = s.jsInjection;
     renderWebhooks(s.webhooks || []);
   } catch {}
 }
@@ -1645,15 +1625,7 @@ window.toggleMaintenance = async function(on) {
     toast(on ? 'Maintenance mode ON — site is now blocked' : 'Maintenance mode OFF', on?'yellow':'green');
   } catch(e) { document.getElementById('maint-toggle').checked = !on; toast(e.message,'red'); }
 };
-window.saveInjections = async function() {
-  try {
-    await api('POST','/api/settings',{
-      cssInjection: document.getElementById('set-css').value,
-      jsInjection: document.getElementById('set-js').value,
-    });
-    toast('Injections saved','green');
-  } catch(e) { toast(e.message,'red'); }
-};
+
 function renderWebhooks(hooks) {
   const el = document.getElementById('webhooks-list');
   if (!hooks.length) { el.innerHTML = '<div class="a-row"><div class="a-label" style="color:var(--dim)">No webhooks configured.</div></div>'; return; }
@@ -1710,16 +1682,100 @@ window.exportBackup = async function() {
   } catch { toast('Backup failed','red'); }
 };
 window.setAdminTheme = function(theme) {
-  const themes = {default:['#668','#446'],blue:['#46a','#248'],green:['#464','#242'],purple:['#846','#624'],red:['#844','#622']};
+  // Each theme: [amb1, amb2, accent-rgb, sidebar-tint, active-item-bg, active-item-border, topbar-glow]
+  const themes = {
+    default: {
+      amb1: '#668', amb2: '#446',
+      accent: '160,180,255',
+      sidebarBorder: 'rgba(255,255,255,.06)',
+      activeItemBg: 'rgba(255,255,255,.07)',
+      activeItemBorder: 'rgba(255,255,255,.10)',
+      toggleCheckedBg: 'rgba(120,180,255,.25)',
+      toggleCheckedBorder: 'rgba(160,200,255,.55)',
+      topbarBorder: 'rgba(255,255,255,.05)',
+    },
+    blue: {
+      amb1: '#2468bb', amb2: '#1244aa',
+      accent: '80,160,255',
+      sidebarBorder: 'rgba(80,160,255,.12)',
+      activeItemBg: 'rgba(80,160,255,.12)',
+      activeItemBorder: 'rgba(80,160,255,.28)',
+      toggleCheckedBg: 'rgba(80,160,255,.25)',
+      toggleCheckedBorder: 'rgba(80,160,255,.55)',
+      topbarBorder: 'rgba(80,160,255,.08)',
+    },
+    green: {
+      amb1: '#226644', amb2: '#114433',
+      accent: '80,200,130',
+      sidebarBorder: 'rgba(80,200,130,.10)',
+      activeItemBg: 'rgba(80,200,130,.10)',
+      activeItemBorder: 'rgba(80,200,130,.24)',
+      toggleCheckedBg: 'rgba(80,200,130,.22)',
+      toggleCheckedBorder: 'rgba(80,200,130,.5)',
+      topbarBorder: 'rgba(80,200,130,.07)',
+    },
+    purple: {
+      amb1: '#7744bb', amb2: '#553388',
+      accent: '180,130,255',
+      sidebarBorder: 'rgba(180,130,255,.12)',
+      activeItemBg: 'rgba(180,130,255,.10)',
+      activeItemBorder: 'rgba(180,130,255,.26)',
+      toggleCheckedBg: 'rgba(180,130,255,.22)',
+      toggleCheckedBorder: 'rgba(180,130,255,.5)',
+      topbarBorder: 'rgba(180,130,255,.08)',
+    },
+    red: {
+      amb1: '#882222', amb2: '#661111',
+      accent: '255,110,100',
+      sidebarBorder: 'rgba(255,110,100,.10)',
+      activeItemBg: 'rgba(255,110,100,.10)',
+      activeItemBorder: 'rgba(255,110,100,.24)',
+      toggleCheckedBg: 'rgba(255,110,100,.20)',
+      toggleCheckedBorder: 'rgba(255,110,100,.5)',
+      topbarBorder: 'rgba(255,110,100,.08)',
+    },
+  };
   const t = themes[theme] || themes.default;
-  document.querySelector('.a1').style.background = `radial-gradient(circle,${t[0]} 0%,transparent 70%)`;
-  document.querySelector('.a2').style.background = `radial-gradient(circle,${t[1]} 0%,transparent 70%)`;
-  document.querySelectorAll('[data-theme]').forEach(b => {
-    b.style.color = b.dataset.theme === theme ? 'var(--white)' : '';
-    b.style.borderColor = b.dataset.theme === theme ? 'rgba(255,255,255,.22)' : '';
+
+  // Ambient blobs
+  document.querySelector('.a1').style.background = `radial-gradient(circle,${t.amb1} 0%,transparent 70%)`;
+  document.querySelector('.a2').style.background = `radial-gradient(circle,${t.amb2} 0%,transparent 70%)`;
+
+  // Inject/update a <style> tag with CSS variable overrides
+  let styleTag = document.getElementById('nova-theme-overrides');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'nova-theme-overrides';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `
+    .sidebar { border-right-color: ${t.sidebarBorder} !important; }
+    .sb-item.active { background: ${t.activeItemBg} !important; border-color: ${t.activeItemBorder} !important; color: #fff !important; }
+    .sb-item.active svg { opacity: 1 !important; }
+    .sb-item:hover { background: ${t.activeItemBg.replace(/[\d.]+\)$/, v => (parseFloat(v)*0.6).toFixed(2)+')')} !important; }
+    .admin-topbar { border-bottom-color: ${t.topbarBorder} !important; }
+    .topbar-dot { background: rgba(${t.accent},.7) !important; box-shadow: 0 0 8px rgba(${t.accent},.4) !important; }
+    .topbar-status { color: rgba(${t.accent},.6) !important; }
+    .toggle-switch input:checked+.toggle-track { background: ${t.toggleCheckedBg} !important; border-color: ${t.toggleCheckedBorder} !important; }
+    .a-btn.primary { border-color: rgba(${t.accent},.35) !important; }
+    .a-btn.primary:hover { background: rgba(${t.accent},.12) !important; }
+    .stat-val { color: #fff; }
+    .a-block::before { background: linear-gradient(90deg,transparent,rgba(${t.accent},.08),transparent) !important; }
+    .chart-tab.active { background: rgba(${t.accent},.12) !important; border-color: rgba(${t.accent},.28) !important; color: rgba(${t.accent},1) !important; }
+    .sb-footer { border-top-color: ${t.sidebarBorder} !important; }
+    code { color: rgba(${t.accent},.8) !important; }
+    .admin-topbar-title { text-shadow: 0 0 40px rgba(${t.accent},.15); }
+  `;
+
+  // Mark active button
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    const active = b.dataset.theme === theme;
+    b.classList.toggle('primary', active);
+    b.style.color = active ? '#fff' : '';
   });
+
   localStorage.setItem('nova:admin-theme', theme);
-  toast('Theme saved');
+  toast('Theme applied', 'green');
 };
 const _t = localStorage.getItem('nova:admin-theme');
 if (_t) setTimeout(() => setAdminTheme(_t), 80);
