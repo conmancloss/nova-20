@@ -129,38 +129,111 @@ async function kset(key, value) {
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
+// ── In-memory caches (cut repeated Redis reads to near zero) ──────────────────
+// nova:admins — read on every authenticated request but almost never changes
+let _adminsCache = null;
+async function getAdmins() {
+  if (_adminsCache) return _adminsCache;
+  _adminsCache = (await kget("nova:admins")) || [];
+  return _adminsCache;
+}
+async function setAdmins(list) {
+  _adminsCache = list;
+  return kset("nova:admins", list);
+}
+
+// nova:blocked — polled by every visitor every 2 min; rarely changes
+let _blockedCache = null;
+async function getBlocked() {
+  if (_blockedCache) return _blockedCache;
+  _blockedCache = (await kget("nova:blocked")) || [];
+  return _blockedCache;
+}
+async function setBlocked(list) {
+  _blockedCache = list;
+  return kset("nova:blocked", list);
+}
+
+// nova:broadcast — polled by every visitor every 60s; rarely changes
+let _broadcastCache = undefined; // undefined = not yet loaded
+async function getBroadcast() {
+  if (_broadcastCache !== undefined) return _broadcastCache;
+  _broadcastCache = await kget("nova:broadcast");
+  return _broadcastCache;
+}
+async function setBroadcast(val) {
+  _broadcastCache = val;
+  if (val) return kset("nova:broadcast", val);
+  return redis("DEL", "nova:broadcast");
+}
+
+// ── Activity + broadcast-history: both cached in memory ──────────────────────
+// Merged into one key (nova:log) so every write is 1 SET instead of 2 GET+SET pairs.
+let _logCache = null;
+
+async function getLog() {
+  if (_logCache) return _logCache;
+  const raw = await kget("nova:log");
+  if (raw && raw.activity) {
+    _logCache = raw;
+  } else {
+    // First run or old schema: migrate existing separate keys in one MGET
+    const [activity, bcHistory] = await Promise.all([
+      kget("nova:activity"),
+      kget("nova:broadcast-history"),
+    ]);
+    _logCache = {
+      activity:  Array.isArray(activity)  ? activity  : [],
+      bcHistory: Array.isArray(bcHistory) ? bcHistory : [],
+    };
+  }
+  return _logCache;
+}
+
+function saveLog() {
+  return kset("nova:log", _logCache);
+}
+
+function buildActivityEntry(entry) {
+  const now = new Date();
+  return {
+    msg:   entry.msg,
+    color: entry.color || "blue",
+    time:  now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date:  now.toISOString().slice(0, 10),
+  };
+}
+
+async function appendActivity(entry) {
+  const log = await getLog();
+  log.activity.unshift(buildActivityEntry(entry));
+  if (log.activity.length > 100) log.activity.length = 100;
+  return saveLog();
+}
+
 // Seed default owner on cold start
 async function seedAdmins() {
-  const admins = await kget("nova:admins");
-  if (!admins || !Array.isArray(admins) || !admins.find(a => a.role === "owner")) {
-    const base = Array.isArray(admins) ? admins : [];
+  const admins = await getAdmins();
+  if (!admins.length || !admins.find(a => a.role === "owner")) {
+    const base = admins.length ? admins : [];
     base.unshift({ user: "admin", pass: "1234", role: "owner", added: todayStr() });
-    await kset("nova:admins", base);
+    await setAdmins(base);
     console.log(chalk.cyan("  Seeded default admin (admin / 1234)"));
   }
 }
 seedAdmins().catch(e => console.error("Seed error:", e.message));
 
-async function appendActivity(entry) {
-  const log = (await kget("nova:activity")) || [];
-  const now = new Date();
-  log.unshift({
-    msg:   entry.msg,
-    color: entry.color || "blue",
-    time:  now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    date:  now.toISOString().slice(0, 10),
-  });
-  if (log.length > 100) log.length = 100;
-  await kset("nova:activity", log);
-}
-
 // ── View counter ──────────────────────────────────────────────────────────────
 app.post("/api/views", async (_req, res) => {
   try {
     const today = todayStr();
-    const total      = await redis("INCR", "nova:views:total");
-    const todayCount = await redis("INCR", `nova:views:day:${today}`);
-    await redis("EXPIRE", `nova:views:day:${today}`, 70 * 24 * 60 * 60);
+    const dayKey = `nova:views:day:${today}`;
+    // Run INCR calls in parallel, fire EXPIRE without waiting (saves 1 round trip)
+    const [total, todayCount] = await Promise.all([
+      redis("INCR", "nova:views:total"),
+      redis("INCR", dayKey),
+    ]);
+    redis("EXPIRE", dayKey, 70 * 24 * 60 * 60).catch(() => {}); // fire-and-forget
     res.setHeader("Cache-Control", "no-store");
     res.json({ total: Number(total), today: Number(todayCount), date: today });
   } catch (e) {
@@ -207,7 +280,7 @@ app.get("/api/views/history", async (_req, res) => {
 app.post("/api/views/reset", async (req, res) => {
   try {
     const { user, pass } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass && a.role === "owner"))
       return res.status(401).json({ error: "Unauthorized" });
     const base = new Date();
@@ -226,10 +299,10 @@ app.post("/api/views/reset", async (req, res) => {
 app.post("/api/admin/login", async (req, res) => {
   try {
     const { user, pass } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     const found = admins.find(a => a.user === user && a.pass === pass);
     if (!found) return res.status(401).json({ error: "Invalid credentials" });
-    await appendActivity({ msg: "Login by " + user, color: "green" });
+    appendActivity({ msg: "Login by " + user, color: "green" }).catch(() => {}); // fire-and-forget
     res.setHeader("Cache-Control", "no-store");
     res.json({ ok: true, role: found.role, user: found.user });
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
@@ -238,7 +311,7 @@ app.post("/api/admin/login", async (req, res) => {
 app.get("/api/admin/accounts", async (req, res) => {
   try {
     const { user, pass } = req.query;
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass))
       return res.status(401).json({ error: "Unauthorized" });
     res.setHeader("Cache-Control", "no-store");
@@ -249,7 +322,7 @@ app.get("/api/admin/accounts", async (req, res) => {
 app.post("/api/admin/accounts", async (req, res) => {
   try {
     const { user, pass, newUser, newPass, newRole } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass && a.role === "owner"))
       return res.status(401).json({ error: "Unauthorized" });
     if (!newUser || !newPass) return res.status(400).json({ error: "Username and password required" });
@@ -257,8 +330,10 @@ app.post("/api/admin/accounts", async (req, res) => {
     if (admins.find(a => a.user === newUser)) return res.status(409).json({ error: "Username already exists" });
     const role = ["admin","viewer"].includes(newRole) ? newRole : "admin";
     admins.push({ user: newUser, pass: newPass, role, added: todayStr() });
-    await kset("nova:admins", admins);
-    await appendActivity({ msg: `Admin added: ${newUser} (${role}) by ${user}`, color: "green" });
+    await Promise.all([
+      setAdmins(admins),
+      appendActivity({ msg: `Admin added: ${newUser} (${role}) by ${user}`, color: "green" }),
+    ]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -267,14 +342,16 @@ app.delete("/api/admin/accounts/:target", async (req, res) => {
   try {
     const { user, pass } = req.body || {};
     const target = req.params.target;
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass && a.role === "owner"))
       return res.status(401).json({ error: "Unauthorized" });
     const tgt = admins.find(a => a.user === target);
     if (!tgt)                 return res.status(404).json({ error: "User not found" });
     if (tgt.role === "owner") return res.status(403).json({ error: "Cannot remove owner" });
-    await kset("nova:admins", admins.filter(a => a.user !== target));
-    await appendActivity({ msg: `Admin removed: ${target} by ${user}`, color: "red" });
+    await Promise.all([
+      setAdmins(admins.filter(a => a.user !== target)),
+      appendActivity({ msg: `Admin removed: ${target} by ${user}`, color: "red" }),
+    ]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -282,13 +359,15 @@ app.delete("/api/admin/accounts/:target", async (req, res) => {
 app.post("/api/admin/password", async (req, res) => {
   try {
     const { user, pass, newPass } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     const me = admins.find(a => a.user === user && a.pass === pass);
     if (!me) return res.status(401).json({ error: "Unauthorized" });
     if (!newPass || newPass.length < 4) return res.status(400).json({ error: "Password too short (min 4)" });
     me.pass = newPass;
-    await kset("nova:admins", admins);
-    await appendActivity({ msg: "Password changed by " + user, color: "yellow" });
+    await Promise.all([
+      setAdmins(admins),
+      appendActivity({ msg: "Password changed by " + user, color: "yellow" }),
+    ]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -296,18 +375,18 @@ app.post("/api/admin/password", async (req, res) => {
 app.get("/api/admin/activity", async (req, res) => {
   try {
     const { user, pass } = req.query;
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass))
       return res.status(401).json({ error: "Unauthorized" });
     res.setHeader("Cache-Control", "no-store");
-    res.json((await kget("nova:activity")) || []);
+    res.json((await getLog()).activity || []);
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
 });
 
 app.post("/api/admin/factory-reset", async (req, res) => {
   try {
     const { user, pass } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass && a.role === "owner"))
       return res.status(401).json({ error: "Unauthorized" });
     const base = new Date();
@@ -316,9 +395,15 @@ app.post("/api/admin/factory-reset", async (req, res) => {
       const d = new Date(base); d.setDate(d.getDate() - i);
       delKeys.push(`nova:views:day:${d.toISOString().slice(0,10)}`);
     }
-    await redis("DEL", ...delKeys);
-    await kset("nova:admins", [{ user: "admin", pass: "1234", role: "owner", added: todayStr() }]);
-    await appendActivity({ msg: "Factory reset by " + user, color: "red" });
+    const fresh = [{ user: "admin", pass: "1234", role: "owner", added: todayStr() }];
+    _adminsCache = fresh; _blockedCache = []; _broadcastCache = null; _logCache = { activity: [], bcHistory: [] };
+    delKeys.push("nova:log");
+    await Promise.all([
+      redis("DEL", ...delKeys),
+      setAdmins(fresh),
+      saveLog(),
+    ]);
+    appendActivity({ msg: "Factory reset by " + user, color: "red" }).catch(() => {});
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -326,10 +411,10 @@ app.post("/api/admin/factory-reset", async (req, res) => {
 // ── Broadcast / Announcement ──────────────────────────────────────────────────
 //  nova:broadcast → { text, date, publishedBy } | null
 
-// Public — any visitor polls this to show the banner
+// Public — any visitor polls this to show the banner (served from cache, 0 Redis calls)
 app.get("/api/broadcast", async (_req, res) => {
   try {
-    const msg = await kget("nova:broadcast");
+    const msg = await getBroadcast();
     res.setHeader("Cache-Control", "no-store");
     res.json(msg || { text: "", date: "", publishedBy: "" });
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
@@ -339,23 +424,24 @@ app.get("/api/broadcast", async (_req, res) => {
 app.post("/api/broadcast", async (req, res) => {
   try {
     const { user, pass, text } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     const me = admins.find(a => a.user === user && a.pass === pass);
     if (!me) return res.status(401).json({ error: "Unauthorized" });
     if (typeof text !== "string") return res.status(400).json({ error: "text required" });
     const trimmed = text.trim().slice(0, 300);
+    const log = await getLog();
     if (trimmed) {
       const entry = { text: trimmed, date: todayStr(), publishedBy: user };
-      await kset("nova:broadcast", entry);
-      // Keep a history log (last 20)
-      const hist = (await kget("nova:broadcast-history")) || [];
-      hist.unshift({ ...entry, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) });
-      if (hist.length > 20) hist.length = 20;
-      await kset("nova:broadcast-history", hist);
-      await appendActivity({ msg: `Broadcast published by ${user}: "${trimmed.slice(0,60)}${trimmed.length>60?"…":""}"`, color: "yellow" });
+      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      log.bcHistory.unshift({ ...entry, time: now });
+      if (log.bcHistory.length > 20) log.bcHistory.length = 20;
+      log.activity.unshift(buildActivityEntry({ msg: `Broadcast published by ${user}: "${trimmed.slice(0,60)}${trimmed.length>60?"…":""}"`, color: "yellow" }));
+      if (log.activity.length > 100) log.activity.length = 100;
+      await Promise.all([setBroadcast(entry), saveLog()]);
     } else {
-      await redis("DEL", "nova:broadcast");
-      await appendActivity({ msg: `Broadcast cleared by ${user}`, color: "yellow" });
+      log.activity.unshift(buildActivityEntry({ msg: `Broadcast cleared by ${user}`, color: "yellow" }));
+      if (log.activity.length > 100) log.activity.length = 100;
+      await Promise.all([setBroadcast(null), saveLog()]);
     }
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -365,11 +451,11 @@ app.post("/api/broadcast", async (req, res) => {
 app.get("/api/broadcast/history", async (req, res) => {
   try {
     const { user, pass } = req.query;
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass))
       return res.status(401).json({ error: "Unauthorized" });
     res.setHeader("Cache-Control", "no-store");
-    res.json((await kget("nova:broadcast-history")) || []);
+    res.json((await getLog()).bcHistory || []);
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
 });
 
@@ -377,12 +463,11 @@ app.get("/api/broadcast/history", async (req, res) => {
 //  nova:blocked → JSON array of { url, reason, date, blockedBy }
 //  Public GET so the client-side proxy can check before navigating
 
-// Public — client polls this before any proxy navigation
+// Public — served from cache, 0 Redis calls after first load
 app.get("/api/blocked", async (_req, res) => {
   try {
-    const list = (await kget("nova:blocked")) || [];
+    const list = await getBlocked();
     res.setHeader("Cache-Control", "no-store");
-    // Only send url + reason to the public (no admin metadata)
     res.json(list.map(b => ({ url: b.url, reason: b.reason || "" })));
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
 });
@@ -391,13 +476,13 @@ app.get("/api/blocked", async (_req, res) => {
 app.post("/api/blocked", async (req, res) => {
   try {
     const { user, pass, url, reason } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     const me = admins.find(a => a.user === user && a.pass === pass);
     if (!me) return res.status(401).json({ error: "Unauthorized" });
     if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
     const cleanUrl = url.trim().toLowerCase().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
     if (!cleanUrl) return res.status(400).json({ error: "Invalid URL" });
-    const list = (await kget("nova:blocked")) || [];
+    const list = await getBlocked();
     if (list.find(b => b.url === cleanUrl)) return res.status(409).json({ error: "Already blocked" });
     const entry = {
       url: cleanUrl,
@@ -406,20 +491,16 @@ app.post("/api/blocked", async (req, res) => {
       blockedBy: user,
     };
     list.push(entry);
-    await kset("nova:blocked", list);
-    // Also log in activity
-    await appendActivity({ msg: `URL blocked by ${user}: ${cleanUrl}${entry.reason ? ` (${entry.reason})` : ""}`, color: "red" });
-    // Announce via broadcast history so it's visible in admin
-    const bHist = (await kget("nova:broadcast-history")) || [];
-    bHist.unshift({
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const log = await getLog();
+    log.bcHistory.unshift({
       text: `🚫 URL blocked: ${cleanUrl}${entry.reason ? " — " + entry.reason : ""}`,
-      date: todayStr(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      publishedBy: user,
-      type: "block",
+      date: todayStr(), time: now, publishedBy: user, type: "block",
     });
-    if (bHist.length > 50) bHist.length = 50;
-    await kset("nova:broadcast-history", bHist);
+    if (log.bcHistory.length > 50) log.bcHistory.length = 50;
+    log.activity.unshift(buildActivityEntry({ msg: `URL blocked by ${user}: ${cleanUrl}${entry.reason ? ` (${entry.reason})` : ""}`, color: "red" }));
+    if (log.activity.length > 100) log.activity.length = 100;
+    await Promise.all([setBlocked(list), saveLog()]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -428,16 +509,18 @@ app.post("/api/blocked", async (req, res) => {
 app.delete("/api/blocked", async (req, res) => {
   try {
     const { user, pass, url } = req.body || {};
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass))
       return res.status(401).json({ error: "Unauthorized" });
     const cleanUrl = (url || "").trim().toLowerCase().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
-    let list = (await kget("nova:blocked")) || [];
+    const list = await getBlocked();
     const before = list.length;
-    list = list.filter(b => b.url !== cleanUrl);
-    if (list.length === before) return res.status(404).json({ error: "URL not found in block list" });
-    await kset("nova:blocked", list);
-    await appendActivity({ msg: `URL unblocked by ${user}: ${cleanUrl}`, color: "green" });
+    const newList = list.filter(b => b.url !== cleanUrl);
+    if (newList.length === before) return res.status(404).json({ error: "URL not found in block list" });
+    await Promise.all([
+      setBlocked(newList),
+      appendActivity({ msg: `URL unblocked by ${user}: ${cleanUrl}`, color: "green" }),
+    ]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -446,11 +529,11 @@ app.delete("/api/blocked", async (req, res) => {
 app.get("/api/blocked/admin", async (req, res) => {
   try {
     const { user, pass } = req.query;
-    const admins = await kget("nova:admins") || [];
+    const admins = await getAdmins();
     if (!admins.find(a => a.user === user && a.pass === pass))
       return res.status(401).json({ error: "Unauthorized" });
     res.setHeader("Cache-Control", "no-store");
-    res.json((await kget("nova:blocked")) || []);
+    res.json(await getBlocked());
   } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
 });
 
