@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		SHORTCUTS.forEach(s => {
 			const btn = document.createElement("button");
 			btn.className = "shortcut-btn";
-			btn.innerHTML = `<span class="sc-emoji">${s.emoji}</span><span class="sc-label">${s.label}</span>`;
+			btn.innerHTML = `<span class="sc-emoji">${s.emoji}</span><span class="sc-label">${s.label}</span><div class="sc-glass"></div>`;
 			btn.addEventListener("click", () => navigate(s.url));
 			row.appendChild(btn);
 		});
@@ -258,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			<button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Unfavorite' : 'Favorite'}">⭐</button>
 			<img src="${g.image}" loading="lazy" onerror="this.style.display='none'" />
 			<div class="game-name">${g.name}</div>
+			<div class="gc-glass"></div>
 		`;
 		div.querySelector(".fav-btn").addEventListener("click", ev => {
 			ev.stopPropagation();

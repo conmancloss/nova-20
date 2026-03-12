@@ -15,13 +15,14 @@
 	<link rel="prefetch" href="/assets/history/worker.js" as="script">
 	<link rel="prefetch" href="/assets/history/config.js" as="script">
 	<link rel="stylesheet" href="/nova.css?v=7">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400&display=swap" media="print" onload="this.media='all'">
-	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400&display=swap"></noscript>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;900&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;900&family=Space+Mono:wght@400;700&display=swap"></noscript>
 	<script>(function(){var t=localStorage.getItem("nova_theme")||"dark";document.documentElement.setAttribute("data-theme",t);})();</script>
 	<!-- Analytics: counter.dev — free, privacy-friendly, no signup needed -->
 	<script async src="https://cdn.counter.dev/script.js" data-id="nova-proxy" data-utcoffset="-5"></script>
 </head>
 <body>
+	<div id="cursor-light"></div>
 	<div class="amb a1"></div>
 	<div class="amb a2"></div>
 	<div id="toast-container"></div>
@@ -133,14 +134,14 @@
 				<div class="page-subtitle">Game sites &amp; platforms</div>
 				<div class="section-label">Platforms</div>
 				<div class="card-grid">
-					<div class="card" onclick="goTo('https://www.crazygames.com')"><span class="card-icon">🎮</span><div class="card-name">CrazyGames</div><div class="card-desc">Hundreds of free browser games</div></div>
-					<div class="card" onclick="goTo('https://poki.com')"><span class="card-icon">🕹️</span><div class="card-name">Poki</div><div class="card-desc">Top-rated free online games</div></div>
-					<div class="card" onclick="goTo('https://www.coolmathgames.com')"><span class="card-icon">🧠</span><div class="card-name">Cool Math Games</div><div class="card-desc">Puzzles, strategy &amp; more</div></div>
-					<div class="card" onclick="goTo('https://www.miniclip.com')"><span class="card-icon">⚡</span><div class="card-name">Miniclip</div><div class="card-desc">Classic browser gaming</div></div>
-					<div class="card" onclick="goTo('https://www.addictinggames.com')"><span class="card-icon">🔥</span><div class="card-name">Addicting Games</div><div class="card-desc">Action, arcade &amp; puzzle</div></div>
-					<div class="card" onclick="goTo('https://html5games.com')"><span class="card-icon">🌐</span><div class="card-name">HTML5 Games</div><div class="card-desc">No Flash required</div></div>
-					<div class="card" onclick="goTo('https://www.kongregate.com')"><span class="card-icon">👾</span><div class="card-name">Kongregate</div><div class="card-desc">Indie &amp; community games</div></div>
-					<div class="card" onclick="goTo('https://itch.io')"><span class="card-icon">🎲</span><div class="card-name">itch.io</div><div class="card-desc">Indie games &amp; experiments</div></div>
+					<div class="card" onclick="goTo('https://www.crazygames.com')"><span class="card-icon">🎮</span><div class="card-name">CrazyGames</div><div class="card-desc">Hundreds of free browser games</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://poki.com')"><span class="card-icon">🕹️</span><div class="card-name">Poki</div><div class="card-desc">Top-rated free online games</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://www.coolmathgames.com')"><span class="card-icon">🧠</span><div class="card-name">Cool Math Games</div><div class="card-desc">Puzzles, strategy &amp; more</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://www.miniclip.com')"><span class="card-icon">⚡</span><div class="card-name">Miniclip</div><div class="card-desc">Classic browser gaming</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://www.addictinggames.com')"><span class="card-icon">🔥</span><div class="card-name">Addicting Games</div><div class="card-desc">Action, arcade &amp; puzzle</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://html5games.com')"><span class="card-icon">🌐</span><div class="card-name">HTML5 Games</div><div class="card-desc">No Flash required</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://www.kongregate.com')"><span class="card-icon">👾</span><div class="card-name">Kongregate</div><div class="card-desc">Indie &amp; community games</div><div class="card-glass"></div></div>
+					<div class="card" onclick="goTo('https://itch.io')"><span class="card-icon">🎲</span><div class="card-name">itch.io</div><div class="card-desc">Indie games &amp; experiments</div><div class="card-glass"></div></div>
 				</div>
 			</div>
 		</div>
@@ -242,6 +243,113 @@
 	<script src="/assets/mathematics/bundle.js" defer></script>
 	<script src="/assets/mathematics/config.js" defer></script>
 	<script src="/nova.js?v=7" defer></script>
+	<script>
+	(function(){
+		var cursorLight = document.getElementById('cursor-light');
+		var lx = -9999, ly = -9999, mx = -9999, my = -9999;
+		var inside = false;
+
+		document.addEventListener('mousemove', function(e){
+			mx = e.clientX; my = e.clientY; inside = true;
+		});
+		document.addEventListener('mouseleave', function(){
+			inside = false;
+		});
+
+		var PULL_DIST = 170;
+		var MAX_TILT  = 16;
+		var MAX_LIFT  = 5;
+		var SPRING    = 0.09;
+		var DAMP      = 0.76;
+
+		function getGlassEls(){
+			var all = [];
+			document.querySelectorAll('.shortcut-btn,.card,.game-card').forEach(function(el){
+				var glass = el.querySelector('.sc-glass,.card-glass,.gc-glass');
+				all.push({el:el, glass:glass, rx:0, ry:0, tx:0, ty:0, sc:1});
+			});
+			return all;
+		}
+
+		var items = [];
+		function refreshItems(){
+			items = getGlassEls();
+		}
+
+		document.addEventListener('DOMContentLoaded', refreshItems);
+		document.addEventListener('nova:page-change', refreshItems);
+
+		var _obs = new MutationObserver(function(mutations){
+			var needsRefresh = mutations.some(function(m){
+				return m.addedNodes.length > 0;
+			});
+			if(needsRefresh) refreshItems();
+		});
+		_obs.observe(document.body, {childList:true, subtree:true});
+
+		function tick(){
+			if(inside && lx === -9999){ lx = mx; ly = my; }
+
+			if(inside){
+				lx += (mx - lx) * 0.12;
+				ly += (my - ly) * 0.12;
+				cursorLight.style.left   = lx + 'px';
+				cursorLight.style.top    = ly + 'px';
+				cursorLight.style.opacity = '1';
+			} else {
+				cursorLight.style.opacity = '0';
+			}
+
+			for(var i = 0; i < items.length; i++){
+				var item = items[i];
+				var el   = item.el;
+				var glass = item.glass;
+				if(!el.offsetParent && el.offsetParent !== document.body) continue;
+
+				var r  = el.getBoundingClientRect();
+				var cx = r.left + r.width  * .5;
+				var cy = r.top  + r.height * .5;
+				var dx = mx - cx, dy = my - cy;
+				var dist = Math.sqrt(dx*dx + dy*dy) || 1;
+
+				var tRx=0, tRy=0, tTx=0, tTy=0, tSc=1;
+
+				if(inside && dist < PULL_DIST){
+					var f = Math.pow(1 - dist/PULL_DIST, 2.4);
+					tRx = -(dy/(r.height*.5)) * MAX_TILT * f;
+					tRy =  (dx/(r.width *.5)) * MAX_TILT * f;
+					tTx = (dx/dist) * MAX_LIFT * f;
+					tTy = (dy/dist) * MAX_LIFT * f;
+					tSc = 1 + f * 0.028;
+
+					if(glass){
+						var lxc = mx - r.left;
+						var lyc = my - r.top;
+						var lpx = ((lxc / r.width)  * 100).toFixed(1);
+						var lpy = ((lyc / r.height) * 100).toFixed(1);
+						glass.style.background = 'radial-gradient(circle at '+lpx+'% '+lpy+'%, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 30%, transparent 65%)';
+						glass.style.opacity = '1';
+					}
+					el.style.borderColor = 'rgba(255,255,255,'+(0.08 + f*0.16).toFixed(3)+')';
+				} else {
+					if(glass) glass.style.opacity = '0';
+					el.style.borderColor = '';
+				}
+
+				var sp = (inside && dist < PULL_DIST) ? SPRING : SPRING * .45;
+				item.rx += (tRx - item.rx)*sp; item.rx *= DAMP;
+				item.ry += (tRy - item.ry)*sp; item.ry *= DAMP;
+				item.tx += (tTx - item.tx)*sp;
+				item.ty += (tTy - item.ty)*sp;
+				item.sc += (tSc - item.sc)*sp;
+
+				el.style.transform = 'perspective(700px) rotateX('+item.rx.toFixed(3)+'deg) rotateY('+item.ry.toFixed(3)+'deg) translate('+item.tx.toFixed(3)+'px,'+item.ty.toFixed(3)+'px) scale('+item.sc.toFixed(4)+')';
+			}
+			requestAnimationFrame(tick);
+		}
+		tick();
+	})();
+	</script>
 
 	<!-- What's New + About: inline so they always run from the no-cache index.html,
 	     never blocked by a stale cached nova.js -->
