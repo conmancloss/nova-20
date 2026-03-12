@@ -451,6 +451,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			function uvNavigate(url) {
 				if (!url) return;
+				// ── Check blocked list before navigating ──────────────────
+				const cleanInput = url.replace(/^https?:\/\//i, "").replace(/\/+$/, "").toLowerCase();
+				if (window._novaBlockedUrls && window._novaBlockedUrls.length) {
+					const hit = window._novaBlockedUrls.find(b => {
+						const bUrl = b.url.toLowerCase();
+						return cleanInput === bUrl ||
+							cleanInput.startsWith(bUrl + "/") ||
+							cleanInput.startsWith(bUrl + "?");
+					});
+					if (hit) {
+						hideLoading();
+						urlBar.value = url;
+						document.getElementById("frame-container").innerHTML =
+							`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:.75rem;padding:2rem;text-align:center;">
+								<div style="font-size:2.5rem">🚫</div>
+								<div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.14em;color:var(--text)">ACCESS BLOCKED</div>
+								<div style="font-size:.78rem;color:var(--muted);max-width:320px;line-height:1.5">${hit.reason ? hit.reason : "This URL has been blocked by an administrator."}</div>
+								<div style="font-size:.66rem;color:var(--dim);font-family:monospace;margin-top:.3rem">${url}</div>
+							</div>`;
+						return;
+					}
+				}
+				// ─────────────────────────────────────────────────────────
 				showLoading();
 				urlBar.value = url;
 				window.history.pushState({ proxyUrl: url }, "", "?q=" + encodeURIComponent(url));
@@ -547,4 +570,78 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		});
 	});
+})();
+
+// ── Broadcast Banner ────────────────────────────────────────────────────────
+(function() {
+	var DISMISSED_KEY = 'nova:broadcast-dismissed';
+
+	function showBanner(text, date) {
+		var banner = document.getElementById('broadcast-banner');
+		var textEl = document.getElementById('broadcast-banner-text');
+		if (!banner || !textEl) return;
+		// If user already dismissed this exact message, don't show again
+		var dismissed = localStorage.getItem(DISMISSED_KEY);
+		if (dismissed === (text + date)) return;
+		textEl.textContent = text;
+		banner.style.display = 'flex';
+		// Push shell down so content isn't hidden under banner
+		var shell = document.getElementById('shell');
+		if (shell) shell.style.paddingTop = banner.offsetHeight + 'px';
+	}
+
+	function hideBanner() {
+		var banner = document.getElementById('broadcast-banner');
+		if (!banner) return;
+		banner.style.display = 'none';
+		var shell = document.getElementById('shell');
+		if (shell) shell.style.paddingTop = '';
+	}
+
+	function checkBroadcast() {
+		fetch('/api/broadcast')
+			.then(function(r) { return r.json(); })
+			.then(function(data) {
+				if (data && data.text) {
+					showBanner(data.text, data.date || '');
+				} else {
+					hideBanner();
+				}
+			})
+			.catch(function() {});
+	}
+
+	// Wire up close button — also saves dismissal so it won't re-appear
+	document.addEventListener('DOMContentLoaded', function() {
+		var closeBtn = document.getElementById('broadcast-banner-close');
+		if (closeBtn) {
+			closeBtn.addEventListener('click', function() {
+				var banner = document.getElementById('broadcast-banner');
+				var textEl = document.getElementById('broadcast-banner-text');
+				if (banner && textEl) {
+					// Remember this specific message was dismissed
+					var dismissed_date = banner.dataset.broadcastDate || '';
+					localStorage.setItem(DISMISSED_KEY, textEl.textContent + dismissed_date);
+				}
+				hideBanner();
+			});
+		}
+		checkBroadcast();
+	});
+
+	// Poll every 60 seconds so new broadcasts appear without a full reload
+	setInterval(checkBroadcast, 60000);
+})();
+
+// ── Blocked URL cache ────────────────────────────────────────────────────────
+// Fetched once on load and refreshed every 2 minutes so proxy checks are instant
+(function() {
+	function fetchBlocked() {
+		fetch('/api/blocked')
+			.then(function(r) { return r.json(); })
+			.then(function(list) { window._novaBlockedUrls = Array.isArray(list) ? list : []; })
+			.catch(function() { window._novaBlockedUrls = window._novaBlockedUrls || []; });
+	}
+	fetchBlocked();
+	setInterval(fetchBlocked, 120000);
 })();
