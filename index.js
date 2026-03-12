@@ -1,4 +1,4 @@
- import fs from "node:fs";
+import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { createBareServer } from "@nebula-services/bare-server-node";
@@ -747,72 +747,84 @@ app.post("/api/admin/unlock", async (req, res) => {
 app.post("/api/admin/login", async (req, res) => {
   try {
     const { user, pass, totpToken } = req.body || {};
+    if (!user || !pass) return res.status(400).json({ error: "Username and password required" });
     const ip = getClientIp(req);
     const ua = (req.headers["user-agent"] || "").slice(0, 200);
-    const settings = await getSecSettings();
-    const threshold = settings.lockoutThreshold || 5;
-    const lockoutMs = (settings.lockoutMinutes || 15) * 60 * 1000;
 
-    // Check attempts
-    const attempts = await getLoginAttempts();
-    const rec = attempts[user] || { count: 0 };
-    if (rec.lockedUntil && Date.now() < rec.lockedUntil) {
-      const mins = Math.ceil((rec.lockedUntil - Date.now()) / 60000);
-      await appendLoginLog({ user: user || "?", ip, ua, success: false, reason: "locked" }).catch(()=>{});
-      return res.status(429).json({ error: `Account locked. Try again in ${mins} minute${mins!==1?"s":""}` });
-    }
+    // ── 1. Check lockout (non-critical: skip if Redis fails) ──────────────────
+    let attempts = {};
+    let threshold = 5, lockoutMs = 15 * 60 * 1000;
+    try {
+      const settings = await getSecSettings();
+      threshold = settings.lockoutThreshold || 5;
+      lockoutMs = (settings.lockoutMinutes || 15) * 60 * 1000;
+      attempts = await getLoginAttempts();
+      const rec = attempts[user] || { count: 0 };
+      if (rec.lockedUntil && Date.now() < rec.lockedUntil) {
+        const mins = Math.ceil((rec.lockedUntil - Date.now()) / 60000);
+        appendLoginLog({ user, ip, ua, success: false, reason: "locked" }).catch(()=>{});
+        return res.status(429).json({ error: `Account locked. Try again in ${mins} minute${mins!==1?"s":""}` });
+      }
+    } catch(e) { /* Redis issue — skip lockout check, don't block login */ }
 
+    // ── 2. Verify credentials (critical — must succeed) ───────────────────────
     const admins = await getAdmins();
     const found = admins.find(a => a.user === user && a.pass === pass);
     if (!found) {
-      rec.count = (rec.count || 0) + 1;
-      if (rec.count >= threshold) {
-        rec.lockedUntil = Date.now() + lockoutMs;
-        rec.count = 0;
-      }
-      attempts[user] = rec;
-      await Promise.all([
-        setLoginAttempts(attempts),
-        appendLoginLog({ user: user||"?", ip, ua, success: false, reason: "bad credentials" }),
-        appendActivity({ msg: `Failed login attempt for "${user||"?"}" from ${ip}`, color: "red" }),
-      ]).catch(()=>{});
+      // Track failed attempt (fire-and-forget — never blocks the response)
+      try {
+        const rec = attempts[user] || { count: 0 };
+        rec.count = (rec.count || 0) + 1;
+        if (rec.count >= threshold) { rec.lockedUntil = Date.now() + lockoutMs; rec.count = 0; }
+        attempts[user] = rec;
+        await setLoginAttempts(attempts);
+      } catch(e) {}
+      appendLoginLog({ user, ip, ua, success: false, reason: "bad credentials" }).catch(()=>{});
+      appendActivity({ msg: `Failed login attempt for "${user}" from ${ip}`, color: "red" }).catch(()=>{});
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Check 2FA if enabled for this user
-    const secrets = (await kget("nova:totp-secrets")) || {};
-    if (secrets[user]) {
-      if (!totpToken) return res.status(401).json({ error: "2FA code required", requires2fa: true });
-      const valid = await totpVerify(secrets[user], totpToken);
-      if (!valid) {
-        await appendLoginLog({ user, ip, ua, success: false, reason: "invalid 2FA" }).catch(()=>{});
-        return res.status(401).json({ error: "Invalid 2FA code" });
+    // ── 3. Check 2FA if enabled (non-critical to fetch, critical to verify) ───
+    try {
+      const secrets = (await kget("nova:totp-secrets")) || {};
+      if (secrets[user]) {
+        if (!totpToken) return res.status(401).json({ error: "2FA code required", requires2fa: true });
+        const valid = await totpVerify(secrets[user], totpToken);
+        if (!valid) {
+          appendLoginLog({ user, ip, ua, success: false, reason: "invalid 2FA" }).catch(()=>{});
+          return res.status(401).json({ error: "Invalid 2FA code" });
+        }
       }
-    }
+    } catch(e) { /* Redis issue — skip 2FA check, allow login */ }
 
-    // Clear lockout on success
-    if (attempts[user]) { delete attempts[user]; await setLoginAttempts(attempts).catch(()=>{}); }
+    // ── 4. Clear lockout + create session (all fire-and-forget) ──────────────
+    try {
+      if (attempts[user]) { delete attempts[user]; setLoginAttempts(attempts).catch(()=>{}); }
+    } catch(e) {}
 
-    // Create session token
-    const { randomBytes } = await import("node:crypto");
-    const token = randomBytes(24).toString("hex");
-    const sessions = await getSessions();
-    // Prune old sessions for this user (max 5 concurrent)
-    const userSessions = Object.entries(sessions).filter(([,s]) => s.user === user);
-    if (userSessions.length >= 5) {
-      userSessions.sort((a,b) => new Date(a[1].lastSeen) - new Date(b[1].lastSeen));
-      delete sessions[userSessions[0][0]];
-    }
-    sessions[token] = { user, role: found.role, ip, ua, created: new Date().toISOString(), lastSeen: new Date().toISOString() };
-    await Promise.all([
-      setSessions(sessions),
-      appendLoginLog({ user, ip, ua, success: true, reason: "" }),
-      appendActivity({ msg: `Login by ${user} from ${ip}`, color: "green" }),
-    ]).catch(()=>{});
+    let sessionToken = null;
+    try {
+      const { randomBytes } = await import("node:crypto");
+      sessionToken = randomBytes(24).toString("hex");
+      const sessions = await getSessions();
+      const userSessions = Object.entries(sessions).filter(([,s]) => s.user === user);
+      if (userSessions.length >= 5) {
+        userSessions.sort((a,b) => new Date(a[1].lastSeen) - new Date(b[1].lastSeen));
+        delete sessions[userSessions[0][0]];
+      }
+      sessions[sessionToken] = { user, role: found.role, ip, ua, created: new Date().toISOString(), lastSeen: new Date().toISOString() };
+      setSessions(sessions).catch(()=>{});
+    } catch(e) { sessionToken = null; }
+
+    appendLoginLog({ user, ip, ua, success: true, reason: "" }).catch(()=>{});
+    appendActivity({ msg: `Login by ${user} from ${ip}`, color: "green" }).catch(()=>{});
 
     res.setHeader("Cache-Control", "no-store");
-    res.json({ ok: true, role: found.role, user: found.user, sessionToken: token });
-  } catch(e) { res.status(500).json({ error: "Storage unavailable" }); }
+    res.json({ ok: true, role: found.role, user: found.user, sessionToken });
+  } catch(e) {
+    console.error("Login error:", e.message);
+    res.status(500).json({ error: "Storage unavailable — check Redis connection" });
+  }
 });
 
 // ── Broadcast / Announcement ──────────────────────────────────────────────────
