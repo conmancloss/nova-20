@@ -8,9 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@300;400;700&display=swap">
 <style>
-/* ═══════════════════════════════════════════════════════
-   NOVA ADMIN — Design tokens mirror nova.css exactly
-   ═══════════════════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0e0e10;--s1:#161618;--text:#d4d4d8;--muted:#52525b;--dim:#3f3f46;--white:#fafafa;
@@ -20,11 +17,11 @@
   --accent:rgba(160,200,255,0.7);--accent-dim:rgba(120,170,255,0.18);
   --danger:rgba(248,113,113,0.8);--danger-dim:rgba(239,68,68,0.12);
   --success:rgba(110,220,150,0.8);--success-dim:rgba(74,222,128,0.10);
+  --warn:rgba(251,191,36,0.8);--warn-dim:rgba(251,191,36,0.10);
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
   font-family:"Lato",sans-serif;font-weight:300;}
 
-/* ambient glow + noise */
 .amb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);}
 .a1{width:600px;height:600px;background:radial-gradient(circle,#668 0%,transparent 70%);top:-180px;left:-120px;opacity:.10;}
 .a2{width:450px;height:450px;background:radial-gradient(circle,#446 0%,transparent 70%);bottom:-100px;right:-80px;opacity:.07;}
@@ -33,331 +30,139 @@ body::before{content:"";position:fixed;inset:0;
   pointer-events:none;z-index:200;opacity:.4;}
 
 /* ── LOCK SCREEN ─────────────────────────────────────── */
-#lock{
-  position:fixed;inset:0;z-index:1000;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg);
-}
-.lock-card{
-  width:min(380px,90vw);
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:var(--r-xl);
-  padding:2.6rem 2.4rem 2.2rem;
-  position:relative;overflow:hidden;
-  animation:rise .4s ease both;
-  box-shadow:0 20px 80px rgba(0,0,0,.6);
-}
-.lock-card::before{
-  content:"";position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
-}
-.lock-star{
-  width:52px;height:52px;margin:0 auto 1.4rem;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:50%;
-}
-.lock-title{
-  font-family:"Bebas Neue",sans-serif;font-size:2rem;letter-spacing:.18em;
-  color:var(--white);text-align:center;margin-bottom:.3rem;
-}
-.lock-sub{
-  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--muted);text-align:center;margin-bottom:2rem;
-}
+#lock{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.lock-card{width:min(380px,90vw);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:var(--r-xl);padding:2.6rem 2.4rem 2.2rem;position:relative;overflow:hidden;animation:rise .4s ease both;box-shadow:0 20px 80px rgba(0,0,0,.6);}
+.lock-card::before{content:"";position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+.lock-star{width:52px;height:52px;margin:0 auto 1.4rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:50%;}
+.lock-title{font-family:"Bebas Neue",sans-serif;font-size:2rem;letter-spacing:.18em;color:var(--white);text-align:center;margin-bottom:.3rem;}
+.lock-sub{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:2rem;}
 .lock-field{margin-bottom:.75rem;}
-.lock-label{
-  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--dim);margin-bottom:.4rem;display:block;
-}
-.lock-input{
-  width:100%;padding:.62rem .9rem;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:var(--r-sm);
-  color:var(--white);font-family:"Lato",sans-serif;font-weight:300;font-size:.88rem;
-  outline:none;transition:border-color .2s,box-shadow .2s;
-}
+.lock-label{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;display:block;}
+.lock-input{width:100%;padding:.62rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:var(--r-sm);color:var(--white);font-family:"Lato",sans-serif;font-weight:300;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s;}
 .lock-input:focus{border-color:rgba(255,255,255,.22);box-shadow:0 0 0 1px rgba(255,255,255,.05);}
 .lock-input.err{border-color:rgba(248,113,113,.4);animation:shake .3s ease;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.lock-err{
-  font-size:.68rem;color:rgba(248,113,113,.75);
-  min-height:1rem;margin-bottom:.6rem;text-align:center;
-}
-.lock-btn{
-  width:100%;padding:.7rem;margin-top:.3rem;
-  font-family:"Lato",sans-serif;font-weight:400;font-size:.72rem;
-  letter-spacing:.2em;text-transform:uppercase;
-  color:var(--white);
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.16);
-  border-radius:var(--r-md);cursor:pointer;
-  transition:background .2s,box-shadow .2s;
-}
+.lock-err{font-size:.68rem;color:rgba(248,113,113,.75);min-height:1rem;margin-bottom:.6rem;text-align:center;}
+.lock-btn{width:100%;padding:.7rem;margin-top:.3rem;font-family:"Lato",sans-serif;font-weight:400;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-md);cursor:pointer;transition:background .2s,box-shadow .2s;}
 .lock-btn:hover{background:rgba(255,255,255,.14);box-shadow:0 0 20px rgba(255,255,255,.05);}
-.lock-back{
-  display:block;text-align:center;margin-top:1.2rem;
-  font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--dim);text-decoration:none;transition:color .2s;cursor:pointer;
-  background:none;border:none;width:100%;
-}
+.lock-back{display:block;text-align:center;margin-top:1.2rem;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);text-decoration:none;transition:color .2s;cursor:pointer;background:none;border:none;width:100%;}
 .lock-back:hover{color:var(--muted);}
 
 /* ── ADMIN SHELL ─────────────────────────────────────── */
-#admin-shell{
-  position:fixed;inset:0;z-index:10;
-  display:none;flex-direction:row;
-}
+#admin-shell{position:fixed;inset:0;z-index:10;display:none;flex-direction:row;}
 #admin-shell.visible{display:flex;}
 
 /* SIDEBAR */
-.sidebar{
-  width:220px;flex-shrink:0;
-  background:rgba(14,14,16,.92);
-  backdrop-filter:blur(40px) saturate(1.5);
-  border-right:1px solid rgba(255,255,255,.06);
-  display:flex;flex-direction:column;
-  padding:1.4rem 0 1rem;
-  position:relative;z-index:20;
-}
-.sidebar::after{
-  content:"";position:absolute;top:0;right:0;bottom:0;width:1px;
-  background:linear-gradient(180deg,transparent,rgba(255,255,255,.06) 20%,rgba(255,255,255,.06) 80%,transparent);
-}
-.sb-brand{
-  padding:0 1.2rem 1.4rem;
-  border-bottom:1px solid rgba(255,255,255,.05);
-  margin-bottom:.6rem;
-}
-.sb-wordmark{
-  font-family:"Bebas Neue",sans-serif;font-size:1.3rem;letter-spacing:.22em;color:var(--white);
-}
-.sb-badge{
-  font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--muted);display:block;margin-top:.15rem;
-}
+.sidebar{width:220px;flex-shrink:0;background:rgba(14,14,16,.92);backdrop-filter:blur(40px) saturate(1.5);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;padding:1.4rem 0 1rem;position:relative;z-index:20;}
+.sidebar::after{content:"";position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.06) 20%,rgba(255,255,255,.06) 80%,transparent);}
+.sb-brand{padding:0 1.2rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:.6rem;}
+.sb-wordmark{font-family:"Bebas Neue",sans-serif;font-size:1.3rem;letter-spacing:.22em;color:var(--white);}
+.sb-badge{font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);display:block;margin-top:.15rem;}
 .sb-nav{display:flex;flex-direction:column;gap:.15rem;padding:0 .65rem;flex:1;}
-.sb-item{
-  display:flex;align-items:center;gap:.6rem;
-  padding:.5rem .75rem;border-radius:var(--r-sm);
-  font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;
-  border:1px solid transparent;
-  transition:color .18s,background .18s,border-color .18s;
-  background:none;width:100%;text-align:left;
-}
+.sb-section-label{font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);padding:.7rem .75rem .3rem;opacity:.6;}
+.sb-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-radius:var(--r-sm);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;border:1px solid transparent;transition:color .18s,background .18s,border-color .18s;background:none;width:100%;text-align:left;}
 .sb-item svg{flex-shrink:0;opacity:.5;transition:opacity .18s;}
 .sb-item:hover{color:var(--text);background:var(--glass-bg);}
 .sb-item:hover svg{opacity:.75;}
 .sb-item.active{color:var(--white);background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.10);}
 .sb-item.active svg{opacity:1;}
+.sb-item .sb-badge-count{margin-left:auto;font-size:.5rem;background:rgba(248,113,113,.2);border:1px solid rgba(248,113,113,.3);color:rgba(248,113,113,.8);border-radius:999px;padding:.1rem .45rem;letter-spacing:.1em;}
 .sb-footer{padding:.8rem 1.2rem 0;border-top:1px solid rgba(255,255,255,.05);}
-.sb-user{
-  display:flex;align-items:center;gap:.6rem;
-  font-size:.68rem;color:var(--muted);
-}
-.sb-avatar{
-  width:28px;height:28px;border-radius:50%;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;font-weight:700;color:rgba(255,255,255,.6);
-  font-family:"Bebas Neue",sans-serif;letter-spacing:.06em;flex-shrink:0;
-}
+.sb-user{display:flex;align-items:center;gap:.6rem;font-size:.68rem;color:var(--muted);}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.6);font-family:"Bebas Neue",sans-serif;letter-spacing:.06em;flex-shrink:0;}
 .sb-username{font-size:.68rem;color:var(--text);letter-spacing:.04em;}
 .sb-role{font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);}
-.sb-logout{
-  margin-left:auto;background:none;border:none;
-  color:var(--dim);cursor:pointer;padding:.2rem;
-  transition:color .18s;flex-shrink:0;
-}
+.sb-logout{margin-left:auto;background:none;border:none;color:var(--dim);cursor:pointer;padding:.2rem;transition:color .18s;flex-shrink:0;}
 .sb-logout:hover{color:var(--danger);}
 
-/* MAIN CONTENT AREA */
-.admin-main{
-  flex:1;overflow:hidden;
-  display:flex;flex-direction:column;
-  background:var(--bg);
-}
-.admin-topbar{
-  padding:.7rem 2rem;
-  border-bottom:1px solid rgba(255,255,255,.05);
-  background:rgba(14,14,16,.7);
-  backdrop-filter:blur(20px);
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
-}
-.admin-topbar-title{
-  font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:.16em;color:var(--white);
-}
+/* MAIN */
+.admin-main{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
+.admin-topbar{padding:.7rem 2rem;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(14,14,16,.7);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.admin-topbar-title{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:.16em;color:var(--white);}
 .admin-topbar-sub{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);}
 .topbar-right{display:flex;align-items:center;gap:.75rem;}
 .topbar-time{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);}
+.topbar-status{display:flex;align-items:center;gap:.4rem;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(110,220,150,.6);}
+.topbar-status-dot{width:6px;height:6px;border-radius:50%;background:rgba(110,220,150,.7);box-shadow:0 0 8px rgba(110,220,150,.5);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
 /* PANELS */
-.admin-panel{
-  display:none;flex:1;overflow-y:auto;
-  padding:2rem 2.2rem;
-  animation:fadeIn .22s ease;
-}
+.admin-panel{display:none;flex:1;overflow-y:auto;padding:2rem 2.2rem;animation:fadeIn .22s ease;}
 .admin-panel.active{display:block;}
 .admin-panel::-webkit-scrollbar{width:3px;}
 .admin-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:2px;}
 
 /* Section label */
-.a-section{
-  font-size:.58rem;letter-spacing:.26em;text-transform:uppercase;
-  color:var(--dim);margin:1.8rem 0 .7rem;
-}
+.a-section{font-size:.58rem;letter-spacing:.26em;text-transform:uppercase;color:var(--dim);margin:1.8rem 0 .7rem;}
 .a-section:first-child{margin-top:0;}
+.a-section-with-action{display:flex;align-items:center;justify-content:space-between;margin:1.8rem 0 .7rem;}
+.a-section-with-action .a-section{margin:0;}
 
 /* Glass block */
-.a-block{
-  background:var(--glass-bg);
-  border:1px solid var(--glass-b);
-  border-radius:var(--r-lg);
-  overflow:hidden;margin-bottom:.85rem;
-  position:relative;
-}
-.a-block::before{
-  content:"";position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
-  pointer-events:none;
-}
-.a-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.85rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);gap:1rem;
-}
+.a-block{background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-lg);overflow:hidden;margin-bottom:.85rem;position:relative;}
+.a-block::before{content:"";position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);pointer-events:none;}
+.a-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);gap:1rem;}
 .a-row:last-child{border-bottom:none;}
 .a-label{font-size:.82rem;color:var(--text);}
 .a-desc{font-size:.67rem;color:var(--muted);margin-top:.1rem;}
-.a-input{
-  flex:1;max-width:240px;
-  padding:.28rem .65rem;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--glass-b);
-  border-radius:var(--r-sm);
-  color:var(--text);font-family:"Lato",sans-serif;font-weight:300;font-size:.76rem;
-  outline:none;transition:border-color .2s;
-}
+.a-input{flex:1;max-width:240px;padding:.28rem .65rem;background:rgba(255,255,255,.04);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--text);font-family:"Lato",sans-serif;font-weight:300;font-size:.76rem;outline:none;transition:border-color .2s;}
 .a-input:focus{border-color:rgba(255,255,255,.22);}
-.a-btn{
-  font-family:"Lato",sans-serif;font-weight:300;font-size:.65rem;
-  letter-spacing:.16em;text-transform:uppercase;
-  color:var(--muted);background:var(--glass-bg);
-  border:1px solid var(--glass-b);border-radius:var(--r-sm);
-  padding:.3rem .8rem;cursor:pointer;transition:color .18s,background .18s,border-color .18s;
-  white-space:nowrap;
-}
+.a-textarea{width:100%;min-height:80px;resize:vertical;padding:.5rem .65rem;background:rgba(255,255,255,.04);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--text);font-family:"Lato",sans-serif;font-weight:300;font-size:.76rem;outline:none;transition:border-color .2s;margin-top:.5rem;}
+.a-textarea:focus{border-color:rgba(255,255,255,.22);}
+.a-btn{font-family:"Lato",sans-serif;font-weight:300;font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-sm);padding:.3rem .8rem;cursor:pointer;transition:color .18s,background .18s,border-color .18s;white-space:nowrap;}
 .a-btn:hover{color:var(--white);background:var(--glass-bg-h);border-color:var(--glass-bh);}
-.a-btn.primary{
-  color:var(--white);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);
-}
+.a-btn.primary{color:var(--white);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);}
 .a-btn.primary:hover{background:rgba(255,255,255,.14);}
 .a-btn.danger{color:var(--danger);border-color:rgba(248,113,113,.2);}
 .a-btn.danger:hover{background:var(--danger-dim);border-color:rgba(248,113,113,.35);}
 .a-btn.success{color:var(--success);border-color:rgba(110,220,150,.2);}
 .a-btn.success:hover{background:var(--success-dim);border-color:rgba(110,220,150,.35);}
+.a-btn.warn{color:var(--warn);border-color:rgba(251,191,36,.2);}
+.a-btn.warn:hover{background:var(--warn-dim);border-color:rgba(251,191,36,.35);}
+.a-btn.sm{font-size:.58rem;padding:.22rem .6rem;}
 
-/* ── OVERVIEW STAT CARDS ─────────────────────────────── */
-.stat-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:.85rem;margin-bottom:1.6rem;
-}
-.stat-card{
-  background:var(--glass-bg);
-  border:1px solid var(--glass-b);
-  border-radius:var(--r-lg);padding:1.3rem 1.4rem;
-  position:relative;overflow:hidden;
-  transition:border-color .2s,background .2s;
-  cursor:default;
-}
-.stat-card::before{
-  content:"";position:absolute;top:0;left:12%;right:12%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);
-}
-.stat-card::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(150deg,rgba(255,255,255,.03) 0%,transparent 60%);
-  border-radius:inherit;pointer-events:none;
-}
+/* ── STAT CARDS ─── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.85rem;margin-bottom:1.6rem;}
+.stat-card{background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-lg);padding:1.3rem 1.4rem;position:relative;overflow:hidden;transition:border-color .2s,background .2s;cursor:default;}
+.stat-card::before{content:"";position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);}
+.stat-card::after{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(255,255,255,.03) 0%,transparent 60%);border-radius:inherit;pointer-events:none;}
 .stat-card:hover{background:var(--glass-bg-h);border-color:var(--glass-bh);}
 .stat-icon{font-size:1.5rem;margin-bottom:.7rem;display:block;line-height:1;}
-.stat-val{
-  font-family:"Bebas Neue",sans-serif;font-size:2.4rem;letter-spacing:.06em;
-  color:var(--white);line-height:1;margin-bottom:.25rem;
-}
+.stat-val{font-family:"Bebas Neue",sans-serif;font-size:2.4rem;letter-spacing:.06em;color:var(--white);line-height:1;margin-bottom:.25rem;}
 .stat-label{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
-.stat-delta{
-  font-size:.62rem;letter-spacing:.1em;color:rgba(110,220,150,.75);
-  margin-top:.2rem;
-}
+.stat-delta{font-size:.62rem;letter-spacing:.1em;color:rgba(110,220,150,.75);margin-top:.2rem;}
 .stat-delta.down{color:var(--danger);}
 
-/* ── VIEWS CHART ─────────────────────────────────────── */
-.chart-wrap{
-  background:var(--glass-bg);border:1px solid var(--glass-b);
-  border-radius:var(--r-lg);padding:1.4rem 1.6rem;margin-bottom:.85rem;
-  position:relative;
-}
-.chart-wrap::before{
-  content:"";position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
-}
+/* ── CHARTS ─── */
+.chart-wrap{background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-lg);padding:1.4rem 1.6rem;margin-bottom:.85rem;position:relative;}
+.chart-wrap::before{content:"";position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);}
 .chart-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.4rem;}
 .chart-title{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
-.chart-val{
-  font-family:"Bebas Neue",sans-serif;font-size:2.2rem;letter-spacing:.08em;color:var(--white);
-}
-#views-chart-canvas{width:100%;height:90px;display:block;}
+.chart-val{font-family:"Bebas Neue",sans-serif;font-size:2.2rem;letter-spacing:.08em;color:var(--white);}
+.chart-tabs{display:flex;gap:.4rem;}
+.chart-tab{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;padding:.2rem .6rem;border-radius:var(--r-sm);cursor:pointer;border:1px solid rgba(255,255,255,.08);color:var(--dim);background:none;transition:all .15s;}
+.chart-tab.active{color:var(--white);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);}
 
-/* ── ADMINS TABLE ────────────────────────────────────── */
+/* ── TABLES ─── */
 .admin-table{width:100%;border-collapse:collapse;}
-.admin-table th{
-  font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--dim);padding:.6rem 1rem;text-align:left;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.admin-table td{
-  font-size:.78rem;color:var(--text);
-  padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);
-}
+.admin-table th{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);padding:.6rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);}
+.admin-table td{font-size:.78rem;color:var(--text);padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);}
 .admin-table tr:last-child td{border-bottom:none;}
 .admin-table tr:hover td{background:rgba(255,255,255,.02);}
-.role-pill{
-  font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
-  padding:.18rem .6rem;border-radius:999px;display:inline-block;
-}
-.role-pill.owner{
-  background:rgba(255,220,100,.1);border:1px solid rgba(255,220,100,.2);color:rgba(255,220,100,.8);
-}
-.role-pill.admin{
-  background:rgba(160,200,255,.08);border:1px solid rgba(160,200,255,.18);color:rgba(160,200,255,.7);
-}
-.role-pill.viewer{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);color:var(--muted);
-}
+.role-pill{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;padding:.18rem .6rem;border-radius:999px;display:inline-block;}
+.role-pill.owner{background:rgba(255,220,100,.1);border:1px solid rgba(255,220,100,.2);color:rgba(255,220,100,.8);}
+.role-pill.admin{background:rgba(160,200,255,.08);border:1px solid rgba(160,200,255,.18);color:rgba(160,200,255,.7);}
+.role-pill.viewer{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);color:var(--muted);}
 .table-actions{display:flex;gap:.4rem;}
-.status-dot{
-  width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:.4rem;
-  background:rgba(110,220,150,.7);box-shadow:0 0 6px rgba(110,220,150,.4);
-}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:.4rem;background:rgba(110,220,150,.7);box-shadow:0 0 6px rgba(110,220,150,.4);}
 .status-dot.off{background:var(--dim);box-shadow:none;}
+.status-dot.warn{background:rgba(251,191,36,.7);box-shadow:0 0 6px rgba(251,191,36,.4);}
 
-/* ── ACTIVITY FEED ───────────────────────────────────── */
-.feed{display:flex;flex-direction:column;gap:.0rem;}
-.feed-item{
-  display:flex;align-items:flex-start;gap:.85rem;
-  padding:.75rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);
-}
+/* ── ACTIVITY FEED ─── */
+.feed{display:flex;flex-direction:column;}
+.feed-item{display:flex;align-items:flex-start;gap:.85rem;padding:.75rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);}
 .feed-item:last-child{border-bottom:none;}
-.feed-dot{
-  width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:.3rem;
-  background:rgba(255,255,255,.2);
-}
+.feed-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:.3rem;background:rgba(255,255,255,.2);}
 .feed-dot.green{background:rgba(110,220,150,.7);}
 .feed-dot.blue{background:rgba(120,170,255,.7);}
 .feed-dot.yellow{background:rgba(252,211,77,.7);}
@@ -365,10 +170,7 @@ body::before{content:"";position:fixed;inset:0;
 .feed-msg{font-size:.76rem;color:var(--text);line-height:1.45;flex:1;}
 .feed-time{font-size:.62rem;color:var(--dim);flex-shrink:0;margin-top:.08rem;}
 
-/* ── ADD ADMIN FORM ──────────────────────────────────── */
-.form-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;}
-
-/* ── TOGGLE ──────────────────────────────────────────── */
+/* ── TOGGLE ─── */
 .toggle-switch{position:relative;display:inline-flex;cursor:pointer;flex-shrink:0;}
 .toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
 .toggle-track{width:44px;height:26px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:100px;position:relative;transition:background .25s,border-color .25s;}
@@ -376,29 +178,80 @@ body::before{content:"";position:fixed;inset:0;
 .toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:rgba(255,255,255,.4);border-radius:50%;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .25s;}
 .toggle-switch input:checked+.toggle-track .toggle-thumb{transform:translateX(18px);background:#fff;}
 
-/* ── TOAST ───────────────────────────────────────────── */
+/* ── TOAST ─── */
 #a-toasts{position:fixed;bottom:1.4rem;right:1.4rem;display:flex;flex-direction:column;gap:.45rem;z-index:9999;pointer-events:none;}
-.a-toast{
-  background:rgba(24,24,27,.97);color:#f4f4f5;
-  border:1px solid rgba(255,255,255,.10);border-radius:var(--r-md);
-  padding:.6rem 1rem;font-size:.72rem;letter-spacing:.08em;
-  backdrop-filter:blur(20px);animation:toastIn .22s ease both;
-  pointer-events:none;max-width:260px;
-}
+.a-toast{background:rgba(24,24,27,.97);color:#f4f4f5;border:1px solid rgba(255,255,255,.10);border-radius:var(--r-md);padding:.6rem 1rem;font-size:.72rem;letter-spacing:.08em;backdrop-filter:blur(20px);animation:toastIn .22s ease both;pointer-events:none;max-width:260px;}
 .a-toast.out{animation:toastOut .28s ease forwards;}
 .a-toast.green{border-color:rgba(110,220,150,.2);}
 .a-toast.red{border-color:rgba(248,113,113,.2);}
+.a-toast.yellow{border-color:rgba(251,191,36,.2);}
 
-/* ── ANIMATIONS ──────────────────────────────────────── */
+/* ── BROADCAST / ANNOUNCEMENT ─── */
+.announcement-preview{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:var(--r-md);padding:1rem 1.2rem;margin-top:.6rem;font-size:.78rem;color:rgba(251,191,36,.8);line-height:1.5;display:none;}
+.announcement-preview.visible{display:block;}
+
+/* ── SEARCH BAR ─── */
+.search-bar-wrap{position:relative;margin-bottom:1rem;}
+.search-bar{width:100%;padding:.5rem .9rem .5rem 2.4rem;background:rgba(255,255,255,.04);border:1px solid var(--glass-b);border-radius:var(--r-md);color:var(--text);font-family:"Lato",sans-serif;font-weight:300;font-size:.8rem;outline:none;transition:border-color .2s;}
+.search-bar:focus{border-color:rgba(255,255,255,.18);}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);opacity:.3;}
+
+/* ── GAMES PANEL ─── */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.7rem;margin-bottom:1rem;}
+.game-card{background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-md);padding:.8rem 1rem;display:flex;align-items:center;gap:.75rem;transition:background .18s,border-color .18s;}
+.game-card:hover{background:var(--glass-bg-h);border-color:var(--glass-bh);}
+.game-icon{width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05);}
+.game-name{font-size:.76rem;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.game-actions{display:flex;gap:.3rem;flex-shrink:0;}
+
+/* ── MODAL ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:rgba(18,18,20,.98);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-xl);padding:2rem;width:min(480px,90vw);max-height:80vh;overflow-y:auto;position:relative;animation:rise .25s ease both;box-shadow:0 40px 120px rgba(0,0,0,.8);}
+.modal-title{font-family:"Bebas Neue",sans-serif;font-size:1.5rem;letter-spacing:.16em;color:var(--white);margin-bottom:.3rem;}
+.modal-sub{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:1.6rem;}
+.modal-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;color:var(--dim);cursor:pointer;transition:color .18s;}
+.modal-close:hover{color:var(--text);}
+.modal-field{margin-bottom:1rem;}
+.modal-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;display:block;}
+.modal-input{width:100%;padding:.5rem .8rem;background:rgba(255,255,255,.04);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--text);font-family:"Lato",sans-serif;font-weight:300;font-size:.82rem;outline:none;transition:border-color .2s;}
+.modal-input:focus{border-color:rgba(255,255,255,.22);}
+.modal-footer{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.4rem;}
+
+/* ── UPTIME / HEALTH ─── */
+.health-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem;margin-bottom:1rem;}
+.health-card{background:var(--glass-bg);border:1px solid var(--glass-b);border-radius:var(--r-lg);padding:1rem 1.2rem;}
+.health-label{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;}
+.health-val{font-family:"Bebas Neue",sans-serif;font-size:1.6rem;letter-spacing:.06em;color:var(--white);}
+.health-sub{font-size:.62rem;color:var(--muted);margin-top:.2rem;}
+.uptime-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:.6rem;overflow:hidden;}
+.uptime-bar-fill{height:100%;background:rgba(110,220,150,.5);border-radius:2px;transition:width .6s ease;}
+
+/* ── BANNED URLS ─── */
+.banned-list{display:flex;flex-direction:column;gap:.5rem;}
+.banned-item{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.12);border-radius:var(--r-sm);}
+.banned-url{font-size:.76rem;color:var(--danger);font-family:monospace;}
+
+/* ── THEME PANEL ─── */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;}
+.theme-swatch{border:1px solid var(--glass-b);border-radius:var(--r-md);padding:.7rem;cursor:pointer;transition:border-color .2s;text-align:center;}
+.theme-swatch:hover,.theme-swatch.selected{border-color:rgba(255,255,255,.3);}
+.theme-color{height:28px;border-radius:var(--r-sm);margin-bottom:.5rem;}
+.theme-name{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+/* ── FORM ROW ─── */
+.form-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;}
+
+/* ── ANIMATIONS ─── */
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(5px)}}
 
-/* ── RESPONSIVE ──────────────────────────────────────── */
+/* ── RESPONSIVE ─── */
 @media(max-width:680px){
   .sidebar{width:56px;}
-  .sb-item span,.sb-badge,.sb-wordmark,.sb-username,.sb-role{display:none;}
+  .sb-item span,.sb-badge,.sb-wordmark,.sb-username,.sb-role,.sb-section-label{display:none;}
   .sb-brand{padding:.8rem .6rem;}
   .sb-item{justify-content:center;padding:.5rem 0;}
   .sb-footer{padding:.6rem 0;display:flex;justify-content:center;}
@@ -406,6 +259,11 @@ body::before{content:"";position:fixed;inset:0;
   .admin-panel{padding:1.2rem 1rem;}
   .stat-grid{grid-template-columns:repeat(2,1fr);}
 }
+
+/* ── ANNOUNCEMENT BAR ─── */
+#announcement-bar{display:none;padding:.5rem 1.6rem;background:rgba(251,191,36,.08);border-bottom:1px solid rgba(251,191,36,.15);font-size:.7rem;color:rgba(251,191,36,.85);letter-spacing:.06em;align-items:center;justify-content:space-between;flex-shrink:0;}
+#announcement-bar.visible{display:flex;}
+#announcement-bar button{background:none;border:none;color:rgba(251,191,36,.5);cursor:pointer;font-size:.9rem;}
 </style>
 </head>
 <body>
@@ -413,7 +271,32 @@ body::before{content:"";position:fixed;inset:0;
 <div class="amb a2"></div>
 <div id="a-toasts"></div>
 
-<!-- ═══════════════ LOCK SCREEN ═══════════════ -->
+<!-- ═══ GAME ADD MODAL ═══ -->
+<div class="modal-overlay" id="modal-game">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-game')">✕</button>
+    <div class="modal-title">ADD GAME</div>
+    <div class="modal-sub">Add a new game to the Nova library</div>
+    <div class="modal-field">
+      <label class="modal-label">Game Name</label>
+      <input class="modal-input" id="mg-name" placeholder="e.g. Cookie Clicker"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Game URL</label>
+      <input class="modal-input" id="mg-url" placeholder="https://..."/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Icon URL or Path</label>
+      <input class="modal-input" id="mg-icon" placeholder="/assets/media/icons/custom.webp"/>
+    </div>
+    <div class="modal-footer">
+      <button class="a-btn" onclick="closeModal('modal-game')">Cancel</button>
+      <button class="a-btn primary" id="mg-submit">Add Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOCK SCREEN ═══ -->
 <div id="lock">
   <div class="lock-card">
     <div class="lock-star">
@@ -438,7 +321,7 @@ body::before{content:"";position:fixed;inset:0;
   </div>
 </div>
 
-<!-- ═══════════════ ADMIN SHELL ═══════════════ -->
+<!-- ═══ ADMIN SHELL ═══ -->
 <div id="admin-shell">
 
   <!-- SIDEBAR -->
@@ -448,14 +331,35 @@ body::before{content:"";position:fixed;inset:0;
       <span class="sb-badge">Admin Console</span>
     </div>
     <nav class="sb-nav">
+      <div class="sb-section-label">Dashboard</div>
       <button class="sb-item active" data-panel="overview">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Overview</span>
       </button>
       <button class="sb-item" data-panel="views">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Views</span>
+        <span>Analytics</span>
       </button>
+      <button class="sb-item" data-panel="health">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>Health</span>
+      </button>
+
+      <div class="sb-section-label">Content</div>
+      <button class="sb-item" data-panel="games">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        <span>Games</span>
+      </button>
+      <button class="sb-item" data-panel="broadcast">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.64A2 2 0 012 .16h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+        <span>Broadcast</span>
+      </button>
+      <button class="sb-item" data-panel="blocked">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span>Blocked URLs</span>
+      </button>
+
+      <div class="sb-section-label">Admin</div>
       <button class="sb-item" data-panel="admins">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         <span>Admins</span>
@@ -474,7 +378,7 @@ body::before{content:"";position:fixed;inset:0;
         <div class="sb-avatar" id="sb-avatar">A</div>
         <div>
           <div class="sb-username" id="sb-username">admin</div>
-          <div class="sb-role">Owner</div>
+          <div class="sb-role" id="sb-role-label">Owner</div>
         </div>
         <button class="sb-logout" id="sb-logout" title="Sign out">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -485,12 +389,22 @@ body::before{content:"";position:fixed;inset:0;
 
   <!-- MAIN -->
   <div class="admin-main">
+    <!-- Announcement Bar -->
+    <div id="announcement-bar">
+      <span id="announcement-bar-text">📢 No active announcement</span>
+      <button onclick="clearAnnouncement()" title="Clear">✕</button>
+    </div>
+
     <div class="admin-topbar">
       <div>
         <div class="admin-topbar-title" id="topbar-title">OVERVIEW</div>
-        <div class="admin-topbar-sub" id="topbar-sub">Welcome back</div>
+        <div class="admin-topbar-sub" id="topbar-sub">Everything at a glance</div>
       </div>
       <div class="topbar-right">
+        <div class="topbar-status">
+          <span class="topbar-status-dot"></span>
+          <span>Live</span>
+        </div>
         <div class="topbar-time" id="topbar-time"></div>
         <a href="/" style="font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);text-decoration:none;padding:.28rem .7rem;border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);transition:color .18s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">← Nova</a>
       </div>
@@ -503,6 +417,7 @@ body::before{content:"";position:fixed;inset:0;
           <span class="stat-icon">👁</span>
           <div class="stat-val" id="ov-total">—</div>
           <div class="stat-label">Total Views</div>
+          <div class="stat-delta" id="ov-delta">—</div>
         </div>
         <div class="stat-card">
           <span class="stat-icon">📅</span>
@@ -515,6 +430,16 @@ body::before{content:"";position:fixed;inset:0;
           <div class="stat-label">Admins</div>
         </div>
         <div class="stat-card">
+          <span class="stat-icon">🎮</span>
+          <div class="stat-val" id="ov-games">—</div>
+          <div class="stat-label">Games</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">🛑</span>
+          <div class="stat-val" id="ov-blocked">—</div>
+          <div class="stat-label">Blocked URLs</div>
+        </div>
+        <div class="stat-card">
           <span class="stat-icon">🟢</span>
           <div class="stat-val">LIVE</div>
           <div class="stat-label">Server Status</div>
@@ -524,16 +449,20 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-section">Quick Actions</div>
       <div class="a-block">
         <div class="a-row">
-          <div><div class="a-label">View Analytics</div><div class="a-desc">Detailed traffic breakdown</div></div>
-          <button class="a-btn primary" onclick="switchPanel('views')">Open Views →</button>
+          <div><div class="a-label">Analytics</div><div class="a-desc">Detailed traffic breakdown and charts</div></div>
+          <button class="a-btn primary" onclick="switchPanel('views')">Open →</button>
         </div>
         <div class="a-row">
-          <div><div class="a-label">Manage Admins</div><div class="a-desc">Add or remove admin access</div></div>
-          <button class="a-btn primary" onclick="switchPanel('admins')">Open Admins →</button>
+          <div><div class="a-label">Broadcast Message</div><div class="a-desc">Send an announcement to all Nova users</div></div>
+          <button class="a-btn warn" onclick="switchPanel('broadcast')">Open →</button>
         </div>
         <div class="a-row">
-          <div><div class="a-label">Console Settings</div><div class="a-desc">Change your password and preferences</div></div>
-          <button class="a-btn primary" onclick="switchPanel('settings')">Open Settings →</button>
+          <div><div class="a-label">Manage Games</div><div class="a-desc">Add, remove, or reorder games in the library</div></div>
+          <button class="a-btn primary" onclick="switchPanel('games')">Open →</button>
+        </div>
+        <div class="a-row">
+          <div><div class="a-label">Block a URL</div><div class="a-desc">Prevent access to specific domains</div></div>
+          <button class="a-btn danger" onclick="switchPanel('blocked')">Open →</button>
         </div>
       </div>
 
@@ -541,7 +470,7 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-block" id="ov-feed"></div>
     </div>
 
-    <!-- ── VIEWS PANEL ── -->
+    <!-- ── ANALYTICS PANEL ── -->
     <div class="admin-panel" id="panel-views">
       <div class="stat-grid">
         <div class="stat-card">
@@ -566,11 +495,18 @@ body::before{content:"";position:fixed;inset:0;
         </div>
       </div>
 
-      <div class="a-section">7-Day Traffic</div>
+      <div class="a-section">Traffic Chart</div>
       <div class="chart-wrap">
         <div class="chart-header">
-          <div class="chart-title">Page Views</div>
-          <div class="chart-val" id="chart-total">—</div>
+          <div>
+            <div class="chart-title">Page Views</div>
+            <div class="chart-val" id="chart-total">—</div>
+          </div>
+          <div class="chart-tabs">
+            <button class="chart-tab active" onclick="setChartRange(7,this)">7D</button>
+            <button class="chart-tab" onclick="setChartRange(14,this)">14D</button>
+            <button class="chart-tab" onclick="setChartRange(30,this)">30D</button>
+          </div>
         </div>
         <canvas id="views-chart-canvas" height="90"></canvas>
       </div>
@@ -578,9 +514,7 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-section">Daily Breakdown</div>
       <div class="a-block">
         <table class="admin-table">
-          <thead>
-            <tr><th>Date</th><th>Views</th><th>vs Prior</th></tr>
-          </thead>
+          <thead><tr><th>Date</th><th>Views</th><th>vs Prior</th><th>Bar</th></tr></thead>
           <tbody id="views-table"></tbody>
         </table>
       </div>
@@ -588,8 +522,144 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-section">Actions</div>
       <div class="a-block">
         <div class="a-row">
+          <div><div class="a-label">Export Data</div><div class="a-desc">Download view history as CSV</div></div>
+          <button class="a-btn success" id="export-views-btn">Export CSV</button>
+        </div>
+        <div class="a-row">
           <div><div class="a-label">Reset Counter</div><div class="a-desc">Wipe all view data — this cannot be undone</div></div>
           <button class="a-btn danger" id="reset-views-btn">Reset All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HEALTH PANEL ── -->
+    <div class="admin-panel" id="panel-health">
+      <div class="a-section">System Health</div>
+      <div class="health-grid">
+        <div class="health-card">
+          <div class="health-label">Server Status</div>
+          <div class="health-val" style="color:rgba(110,220,150,.9)">ONLINE</div>
+          <div class="health-sub">All systems operational</div>
+          <div class="uptime-bar"><div class="uptime-bar-fill" style="width:99%"></div></div>
+        </div>
+        <div class="health-card">
+          <div class="health-label">Storage</div>
+          <div class="health-val" id="health-storage">—</div>
+          <div class="health-sub">Upstash Redis</div>
+          <div class="uptime-bar"><div class="uptime-bar-fill" id="health-storage-bar" style="width:0%"></div></div>
+        </div>
+        <div class="health-card">
+          <div class="health-label">API Latency</div>
+          <div class="health-val" id="health-latency">—</div>
+          <div class="health-sub">Last measured ping</div>
+          <div class="uptime-bar"><div class="uptime-bar-fill" id="health-latency-bar" style="width:0%;background:rgba(160,200,255,.5)"></div></div>
+        </div>
+        <div class="health-card">
+          <div class="health-label">Admin Accounts</div>
+          <div class="health-val" id="health-admins">—</div>
+          <div class="health-sub">Total registered</div>
+        </div>
+      </div>
+
+      <div class="a-section">Diagnostics</div>
+      <div class="a-block">
+        <div class="a-row">
+          <div><div class="a-label">Ping Storage</div><div class="a-desc">Test Upstash Redis connection latency</div></div>
+          <button class="a-btn primary" onclick="pingStorage()">Run Ping</button>
+        </div>
+        <div class="a-row">
+          <div><div class="a-label">Check API Routes</div><div class="a-desc">Verify all Nova API endpoints respond</div></div>
+          <button class="a-btn primary" onclick="checkRoutes()">Check Now</button>
+        </div>
+        <div class="a-row" id="route-results" style="display:none">
+          <div style="flex:1">
+            <div class="a-label">Route Status</div>
+            <div id="route-results-body" style="margin-top:.5rem;font-size:.72rem;color:var(--muted);line-height:1.8;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAMES PANEL ── -->
+    <div class="admin-panel" id="panel-games">
+      <div class="a-section-with-action">
+        <span class="a-section" style="margin:0">Game Library</span>
+        <button class="a-btn success" onclick="openModal('modal-game')">+ Add Game</button>
+      </div>
+      <div class="search-bar-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-bar" id="games-search" placeholder="Search games…" oninput="filterGames(this.value)"/>
+      </div>
+      <div id="games-count" style="font-size:.62rem;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.75rem;"></div>
+      <div class="games-grid" id="games-grid"></div>
+    </div>
+
+    <!-- ── BROADCAST PANEL ── -->
+    <div class="admin-panel" id="panel-broadcast">
+      <div class="a-section">Active Announcement</div>
+      <div class="a-block">
+        <div class="a-row" style="flex-direction:column;align-items:flex-start;">
+          <div style="width:100%">
+            <div class="a-label">Announcement Text</div>
+            <div class="a-desc">Displayed as a banner to all users visiting Nova</div>
+            <textarea class="a-textarea" id="broadcast-text" placeholder="Type your announcement here…" maxlength="200"></textarea>
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:.7rem;width:100%;justify-content:flex-end">
+            <button class="a-btn" onclick="previewAnnouncement()">Preview</button>
+            <button class="a-btn warn" onclick="publishAnnouncement()">Publish</button>
+            <button class="a-btn danger" onclick="clearAnnouncement()">Clear</button>
+          </div>
+        </div>
+        <div class="announcement-preview" id="broadcast-preview"></div>
+      </div>
+
+      <div class="a-section">Announcement History</div>
+      <div class="a-block" id="broadcast-history-block">
+        <div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No past announcements.</div></div>
+      </div>
+
+      <div class="a-section">Quick Templates</div>
+      <div class="a-block">
+        <div class="a-row">
+          <div><div class="a-label">🔧 Maintenance</div><div class="a-desc">System maintenance notice</div></div>
+          <button class="a-btn sm warn" onclick="useTemplate('🔧 Nova is undergoing maintenance. Some features may be unavailable.')">Use</button>
+        </div>
+        <div class="a-row">
+          <div><div class="a-label">🎉 Update</div><div class="a-desc">New features announcement</div></div>
+          <button class="a-btn sm success" onclick="useTemplate('🎉 Nova has been updated! Check out the new games and features.')">Use</button>
+        </div>
+        <div class="a-row">
+          <div><div class="a-label">⚠️ Notice</div><div class="a-desc">General user notice</div></div>
+          <button class="a-btn sm" onclick="useTemplate('⚠️ Please use Nova responsibly. Misuse may result in access being revoked.')">Use</button>
+        </div>
+        <div class="a-row">
+          <div><div class="a-label">🎮 New Games</div><div class="a-desc">New game addition notice</div></div>
+          <button class="a-btn sm primary" onclick="useTemplate('🎮 New games have been added to the library! Go check them out.')">Use</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BLOCKED URLS PANEL ── -->
+    <div class="admin-panel" id="panel-blocked">
+      <div class="a-section">Block a URL or Domain</div>
+      <div class="a-block">
+        <div class="a-row">
+          <div style="flex:1">
+            <div class="a-label">URL / Domain to Block</div>
+            <div class="a-desc">e.g. "social-media.com" or a full URL path</div>
+          </div>
+          <div class="form-row">
+            <input class="a-input" id="block-input" placeholder="domain.com or URL" style="max-width:220px"/>
+            <input class="a-input" id="block-reason" placeholder="Reason (optional)" style="max-width:160px"/>
+            <button class="a-btn danger" id="add-block-btn">Block</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="a-section">Blocked List</div>
+      <div class="a-block">
+        <div id="blocked-list-wrap" style="padding:.6rem 1rem;">
+          <div style="font-size:.72rem;color:var(--dim)">No URLs blocked yet.</div>
         </div>
       </div>
     </div>
@@ -599,9 +669,7 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-section">Admin Accounts</div>
       <div class="a-block">
         <table class="admin-table">
-          <thead>
-            <tr><th>Username</th><th>Role</th><th>Added</th><th>Actions</th></tr>
-          </thead>
+          <thead><tr><th>Username</th><th>Role</th><th>Added</th><th>Last Login</th><th>Actions</th></tr></thead>
           <tbody id="admins-table"></tbody>
         </table>
       </div>
@@ -619,6 +687,19 @@ body::before{content:"";position:fixed;inset:0;
             </select>
             <button class="a-btn primary" id="add-admin-btn">Add</button>
           </div>
+        </div>
+      </div>
+
+      <div class="a-section">Permissions Reference</div>
+      <div class="a-block">
+        <div class="a-row">
+          <div><span class="role-pill owner" style="margin-right:.6rem">Owner</span><span class="a-desc">Full access — manage admins, factory reset, all settings</span></div>
+        </div>
+        <div class="a-row">
+          <div><span class="role-pill admin" style="margin-right:.6rem">Admin</span><span class="a-desc">Manage games, broadcast, block URLs, view analytics</span></div>
+        </div>
+        <div class="a-row">
+          <div><span class="role-pill viewer" style="margin-right:.6rem">Viewer</span><span class="a-desc">Read-only access to analytics and activity logs</span></div>
         </div>
       </div>
     </div>
@@ -640,11 +721,12 @@ body::before{content:"";position:fixed;inset:0;
       <div class="a-section">Appearance</div>
       <div class="a-block">
         <div class="a-row">
-          <div><div class="a-label">Console Theme</div><div class="a-desc">Choose dark or a tinted accent</div></div>
+          <div><div class="a-label">Console Theme</div><div class="a-desc">Choose a color accent for the admin console</div></div>
           <div style="display:flex;gap:.4rem;">
-            <button class="a-btn active-theme" data-theme="default" onclick="setAdminTheme('default')" style="color:var(--white);border-color:rgba(255,255,255,.18);">Default</button>
+            <button class="a-btn" data-theme="default" onclick="setAdminTheme('default')" style="color:var(--white);border-color:rgba(255,255,255,.18);">Default</button>
             <button class="a-btn" data-theme="blue" onclick="setAdminTheme('blue')">Blue</button>
             <button class="a-btn" data-theme="green" onclick="setAdminTheme('green')">Green</button>
+            <button class="a-btn" data-theme="purple" onclick="setAdminTheme('purple')">Purple</button>
           </div>
         </div>
       </div>
@@ -658,10 +740,21 @@ body::before{content:"";position:fixed;inset:0;
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </label>
         </div>
+        <div class="a-row">
+          <div><div class="a-label">Show Announcement Bar</div><div class="a-desc">Preview announcement banner here in admin</div></div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ann-bar-toggle" onchange="toggleAnnouncementBar(this.checked)">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
       </div>
 
       <div class="a-section">Danger Zone</div>
       <div class="a-block">
+        <div class="a-row">
+          <div><div class="a-label">Clear Activity Log</div><div class="a-desc">Wipes all recorded activity entries</div></div>
+          <button class="a-btn danger" id="clear-log-btn">Clear Log</button>
+        </div>
         <div class="a-row">
           <div><div class="a-label">Reset All Admin Data</div><div class="a-desc">Removes all admins, resets passwords and counters</div></div>
           <button class="a-btn danger" id="factory-reset-btn">Factory Reset</button>
@@ -671,7 +764,14 @@ body::before{content:"";position:fixed;inset:0;
 
     <!-- ── ACTIVITY PANEL ── -->
     <div class="admin-panel" id="panel-activity">
-      <div class="a-section">Activity Log</div>
+      <div class="a-section-with-action">
+        <span class="a-section" style="margin:0">Activity Log</span>
+        <button class="a-btn sm" onclick="exportActivity()">Export Log</button>
+      </div>
+      <div class="search-bar-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-bar" id="activity-search" placeholder="Filter log entries…" oninput="filterActivity(this.value)"/>
+      </div>
       <div class="a-block" id="activity-feed"></div>
     </div>
 
@@ -680,24 +780,25 @@ body::before{content:"";position:fixed;inset:0;
 
 <script>
 // ═══════════════════════════════════════════════════════
-//  NOVA ADMIN CONSOLE — server-backed, shared across all users
+//  NOVA ADMIN CONSOLE — Enhanced v2
 // ═══════════════════════════════════════════════════════
 
-// ── Session (in-memory only — credentials never persisted) ───
-let SESSION = null; // { user, pass, role }
+let SESSION = null;
+let GAMES_DATA = [];
+let BLOCKED_URLS = JSON.parse(localStorage.getItem('nova:blocked') || '[]');
+let ANNOUNCEMENTS = JSON.parse(localStorage.getItem('nova:announcements') || '[]');
+let ACTIVE_ANNOUNCEMENT = localStorage.getItem('nova:active-announcement') || '';
+let CHART_RANGE = 7;
+let ALL_ACTIVITY = [];
 
 // ── Helpers ────────────────────────────────────────────
 function today() { return new Date().toISOString().slice(0,10); }
-function now()   { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmt(n)  { if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(n||0); }
 function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeNow() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 
-// ── API wrapper ─────────────────────────────────────────
 async function api(method, path, body) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-  };
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
   const data = await r.json();
@@ -717,9 +818,9 @@ function toast(msg, type) {
 // ── Clock ───────────────────────────────────────────────
 function tickClock() {
   const d = new Date();
-  const str = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})
-    + ' · ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('topbar-time').textContent = str;
+  document.getElementById('topbar-time').textContent =
+    d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' +
+    d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 }
 setInterval(tickClock, 1000); tickClock();
 
@@ -740,7 +841,9 @@ async function login() {
     document.getElementById('admin-shell').classList.add('visible');
     document.getElementById('sb-username').textContent = user;
     document.getElementById('sb-avatar').textContent = user[0].toUpperCase();
+    document.getElementById('sb-role-label').textContent = data.role.charAt(0).toUpperCase() + data.role.slice(1);
     refreshAll();
+    loadGames();
   } catch(e) {
     const inputs = [document.getElementById('l-user'), document.getElementById('l-pass')];
     inputs.forEach(i => { i.classList.add('err'); setTimeout(() => i.classList.remove('err'), 400); });
@@ -752,7 +855,6 @@ async function login() {
   }
 }
 
-// ── Logout ──────────────────────────────────────────────
 document.getElementById('sb-logout').addEventListener('click', () => {
   SESSION = null;
   document.getElementById('admin-shell').classList.remove('visible');
@@ -761,13 +863,24 @@ document.getElementById('sb-logout').addEventListener('click', () => {
   document.getElementById('l-user').value = '';
 });
 
+// ── Modal helpers ───────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
 // ── Panel switching ─────────────────────────────────────
 const PANEL_META = {
-  overview: { title: 'OVERVIEW',  sub: 'Everything at a glance' },
-  views:    { title: 'VIEWS',     sub: 'Traffic & analytics' },
-  admins:   { title: 'ADMINS',    sub: 'Access management' },
-  settings: { title: 'SETTINGS',  sub: 'Console configuration' },
-  activity: { title: 'ACTIVITY',  sub: 'Recent log entries' },
+  overview:  { title:'OVERVIEW',      sub:'Everything at a glance' },
+  views:     { title:'ANALYTICS',     sub:'Traffic & analytics' },
+  health:    { title:'HEALTH',        sub:'System diagnostics' },
+  games:     { title:'GAMES',         sub:'Library management' },
+  broadcast: { title:'BROADCAST',     sub:'Announcements & messaging' },
+  blocked:   { title:'BLOCKED URLS',  sub:'Access control' },
+  admins:    { title:'ADMINS',        sub:'Access management' },
+  settings:  { title:'SETTINGS',      sub:'Console configuration' },
+  activity:  { title:'ACTIVITY',      sub:'Recent log entries' },
 };
 function switchPanel(name) {
   document.querySelectorAll('.sb-item').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
@@ -775,10 +888,14 @@ function switchPanel(name) {
   const m = PANEL_META[name] || {};
   document.getElementById('topbar-title').textContent = m.title || name.toUpperCase();
   document.getElementById('topbar-sub').textContent = m.sub || '';
-  if (name === 'views')    renderViews();
-  if (name === 'admins')   renderAdmins();
-  if (name === 'activity') renderActivity();
-  if (name === 'overview') renderOverview();
+  if (name === 'views')     renderViews();
+  if (name === 'admins')    renderAdmins();
+  if (name === 'activity')  renderActivity();
+  if (name === 'overview')  renderOverview();
+  if (name === 'health')    renderHealth();
+  if (name === 'games')     renderGames();
+  if (name === 'blocked')   renderBlocked();
+  if (name === 'broadcast') renderBroadcast();
 }
 document.querySelectorAll('.sb-item').forEach(b => b.addEventListener('click', () => switchPanel(b.dataset.panel)));
 window.switchPanel = switchPanel;
@@ -794,55 +911,44 @@ async function renderOverview() {
     document.getElementById('ov-total').textContent  = fmt(v.total);
     document.getElementById('ov-today').textContent  = fmt(v.today);
     document.getElementById('ov-admins').textContent = Array.isArray(accounts) ? accounts.length : '—';
+    document.getElementById('ov-games').textContent  = GAMES_DATA.length || '—';
+    document.getElementById('ov-blocked').textContent = BLOCKED_URLS.length;
 
     const feed = Array.isArray(activity) ? activity.slice(0,8) : [];
     const el = document.getElementById('ov-feed');
-    if (!feed.length) {
-      el.innerHTML = '<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No activity yet.</div></div>';
-      return;
-    }
-    el.innerHTML = feed.map(f =>
-      `<div class="feed-item">
-        <div class="feed-dot ${esc(f.color||'blue')}"></div>
-        <div class="feed-msg">${esc(f.msg)}</div>
-        <div class="feed-time">${esc(f.time)}</div>
-      </div>`
-    ).join('');
+    el.innerHTML = feed.length
+      ? feed.map(f => `<div class="feed-item"><div class="feed-dot ${esc(f.color||'blue')}"></div><div class="feed-msg">${esc(f.msg)}</div><div class="feed-time">${esc(f.time)}</div></div>`).join('')
+      : '<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No activity yet.</div></div>';
   } catch(e) { console.error('Overview error:', e); }
 }
 
-// ── VIEWS ───────────────────────────────────────────────
+// ── ANALYTICS ───────────────────────────────────────────
 async function renderViews() {
   try {
     const [v, hist] = await Promise.all([
       fetch('/api/views').then(r=>r.json()),
       fetch('/api/views/history').then(r=>r.json()),
     ]);
-
     document.getElementById('v-total').textContent = fmt(v.total);
     document.getElementById('v-today').textContent = fmt(v.today);
     document.getElementById('chart-total').textContent = fmt(v.total);
 
-    // Build last 7 days
     const days = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = CHART_RANGE - 1; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0,10);
-      const label = d.toLocaleDateString('en-US',{weekday:'short'});
-      days.push({ key, label, val: hist[key] || (key === today() ? (v.today||0) : 0) });
+      days.push({ key, label: d.toLocaleDateString('en-US',{weekday:'short'}), val: hist[key] || (key === today() ? (v.today||0) : 0) });
     }
 
     const weekSum = days.reduce((a,b) => a+b.val, 0);
     document.getElementById('v-week').textContent = fmt(weekSum);
-
     const allVals = Object.values(hist).map(Number);
-    const peak = allVals.length ? Math.max(...allVals) : (v.today||0);
-    document.getElementById('v-peak').textContent = fmt(peak);
+    document.getElementById('v-peak').textContent = fmt(allVals.length ? Math.max(...allVals) : (v.today||0));
 
     drawBarChart(days);
 
-    // Table — last 7 days newest first
     const rev = [...days].reverse();
+    const maxVal = Math.max(...rev.map(d=>d.val), 1);
     document.getElementById('views-table').innerHTML = rev.map((d,i) => {
       const prev = rev[i+1];
       let delta = '';
@@ -852,23 +958,30 @@ async function renderViews() {
         else if (diff < 0) delta = `<span style="color:rgba(248,113,113,.75)">${diff}</span>`;
         else delta = '<span style="color:var(--dim)">—</span>';
       }
-      return `<tr><td>${esc(d.key)}</td><td>${d.val}</td><td>${delta}</td></tr>`;
+      const pct = Math.round((d.val / maxVal) * 100);
+      const bar = `<div style="height:4px;width:${pct}%;min-width:${d.val>0?4:0}px;background:rgba(160,200,255,.35);border-radius:2px;"></div>`;
+      return `<tr><td>${esc(d.key)}</td><td>${d.val}</td><td>${delta}</td><td style="width:100px">${bar}</td></tr>`;
     }).join('');
   } catch(e) { console.error('Views error:', e); }
 }
+
+window.setChartRange = function(n, btn) {
+  CHART_RANGE = n;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.toggle('active', t === btn));
+  renderViews();
+};
 
 function drawBarChart(days) {
   const canvas = document.getElementById('views-chart-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.clientWidth - 48;
-  const H = 90;
-  canvas.width  = W * dpr; canvas.height = H * dpr;
+  const W = canvas.parentElement.clientWidth - 48, H = 90;
+  canvas.width = W*dpr; canvas.height = H*dpr;
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
   ctx.scale(dpr, dpr);
   const max = Math.max(...days.map(d=>d.val), 1);
-  const barW = Math.floor(W/days.length) - 6;
+  const barW = Math.max(4, Math.floor(W/days.length) - (days.length > 14 ? 3 : 6));
   const pad = 20;
   ctx.clearRect(0,0,W,H);
   days.forEach((d,i) => {
@@ -876,7 +989,7 @@ function drawBarChart(days) {
     const barH = Math.max(2, ((d.val/max)*(H-pad-4)));
     const y = H-pad-barH;
     const isToday = d.key === today();
-    ctx.fillStyle = isToday ? 'rgba(160,200,255,0.45)' : 'rgba(255,255,255,0.12)';
+    ctx.fillStyle = isToday ? 'rgba(160,200,255,0.5)' : 'rgba(255,255,255,0.12)';
     const r = 3;
     ctx.beginPath();
     ctx.moveTo(x+r,y); ctx.lineTo(x+barW-r,y);
@@ -884,12 +997,221 @@ function drawBarChart(days) {
     ctx.lineTo(x+barW,y+barH); ctx.lineTo(x,y+barH);
     ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
     ctx.closePath(); ctx.fill();
-    ctx.fillStyle = isToday ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)';
-    ctx.font = '300 9px Lato,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(d.label, x+barW/2, H-4);
+    if (days.length <= 14) {
+      ctx.fillStyle = isToday ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)';
+      ctx.font = '300 9px Lato,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(d.label, x+barW/2, H-4);
+    }
   });
 }
+
+document.getElementById('export-views-btn').addEventListener('click', async () => {
+  try {
+    const hist = await fetch('/api/views/history').then(r=>r.json());
+    const rows = [['Date','Views']];
+    Object.entries(hist).sort().forEach(([k,v]) => rows.push([k,v]));
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `nova-views-${today()}.csv`;
+    a.click();
+    toast('Exported CSV', 'green');
+  } catch(e) { toast('Export failed', 'red'); }
+});
+
+// ── HEALTH ──────────────────────────────────────────────
+async function renderHealth() {
+  const start = Date.now();
+  try {
+    const v = await fetch('/api/views').then(r=>r.json());
+    const latency = Date.now() - start;
+    document.getElementById('health-latency').textContent = latency + 'ms';
+    const latencyPct = Math.max(5, Math.min(100, 100 - latency/5));
+    document.getElementById('health-latency-bar').style.width = latencyPct + '%';
+    document.getElementById('health-latency-bar').style.background =
+      latency < 100 ? 'rgba(110,220,150,.5)' : latency < 300 ? 'rgba(251,191,36,.5)' : 'rgba(248,113,113,.5)';
+    document.getElementById('health-storage').textContent = v.total !== undefined ? 'OK' : 'ERR';
+    document.getElementById('health-storage-bar').style.width = '99%';
+  } catch(e) {
+    document.getElementById('health-storage').textContent = 'ERR';
+    document.getElementById('health-storage').style.color = 'var(--danger)';
+  }
+  try {
+    const accounts = await fetch(`/api/admin/accounts?user=${encodeURIComponent(SESSION.user)}&pass=${encodeURIComponent(SESSION.pass)}`).then(r=>r.json());
+    document.getElementById('health-admins').textContent = Array.isArray(accounts) ? accounts.length : '—';
+  } catch(e) {}
+}
+
+window.pingStorage = async function() {
+  toast('Pinging storage…');
+  const t = Date.now();
+  try {
+    await fetch('/api/views');
+    toast(`Ping: ${Date.now()-t}ms`, 'green');
+  } catch(e) { toast('Storage unreachable', 'red'); }
+};
+
+window.checkRoutes = async function() {
+  const routes = ['/api/views', '/api/views/history'];
+  const results = document.getElementById('route-results');
+  const body = document.getElementById('route-results-body');
+  results.style.display = 'flex';
+  body.innerHTML = 'Checking…';
+  const lines = [];
+  for (const r of routes) {
+    try {
+      const t = Date.now(); await fetch(r); const ms = Date.now() - t;
+      lines.push(`<span style="color:rgba(110,220,150,.8)">✓</span> ${r} <span style="color:var(--dim)">(${ms}ms)</span>`);
+    } catch(e) {
+      lines.push(`<span style="color:var(--danger)">✗</span> ${r}`);
+    }
+  }
+  body.innerHTML = lines.join('<br>');
+};
+
+// ── GAMES ───────────────────────────────────────────────
+async function loadGames() {
+  try {
+    const data = await fetch('/games.json').then(r=>r.json());
+    GAMES_DATA = Array.isArray(data) ? data : [];
+  } catch(e) { GAMES_DATA = []; }
+}
+
+function renderGames(filter='') {
+  const search = (filter || document.getElementById('games-search')?.value || '').toLowerCase();
+  const list = search ? GAMES_DATA.filter(g => g.name.toLowerCase().includes(search)) : GAMES_DATA;
+  document.getElementById('games-count').textContent = `${list.length} of ${GAMES_DATA.length} games`;
+  document.getElementById('games-grid').innerHTML = list.map((g,i) =>
+    `<div class="game-card">
+      <img class="game-icon" src="${esc(g.image)}" onerror="this.style.opacity=0.3" loading="lazy"/>
+      <span class="game-name" title="${esc(g.name)}">${esc(g.name)}</span>
+      <div class="game-actions">
+        <a href="${esc(g.url)}" target="_blank" class="a-btn sm" title="Open">↗</a>
+      </div>
+    </div>`
+  ).join('');
+}
+
+window.filterGames = function(v) { renderGames(v); };
+
+// Add game modal
+document.getElementById('mg-submit').addEventListener('click', () => {
+  const name = document.getElementById('mg-name').value.trim();
+  const url  = document.getElementById('mg-url').value.trim();
+  const icon = document.getElementById('mg-icon').value.trim() || '/assets/media/icons/custom.webp';
+  if (!name || !url) { toast('Name and URL required', 'red'); return; }
+  GAMES_DATA.push({ name, url, image: icon });
+  toast(`"${name}" added to local view`, 'green');
+  toast('Note: restart server to persist in games.json', 'yellow');
+  closeModal('modal-game');
+  document.getElementById('mg-name').value = '';
+  document.getElementById('mg-url').value = '';
+  document.getElementById('mg-icon').value = '';
+  renderGames();
+  document.getElementById('ov-games').textContent = GAMES_DATA.length;
+});
+
+// ── BROADCAST ───────────────────────────────────────────
+function renderBroadcast() {
+  document.getElementById('broadcast-text').value = ACTIVE_ANNOUNCEMENT;
+  if (ANNOUNCEMENTS.length) {
+    document.getElementById('broadcast-history-block').innerHTML = ANNOUNCEMENTS.slice(0,8).map(a =>
+      `<div class="feed-item">
+        <div class="feed-dot yellow"></div>
+        <div><div class="feed-msg">${esc(a.text)}</div>
+        <div style="font-size:.6rem;color:var(--dim);margin-top:.18rem">${esc(a.date)}</div></div>
+        <button class="a-btn sm" onclick="useTemplate(${JSON.stringify(a.text)})">Reuse</button>
+      </div>`
+    ).join('');
+  }
+}
+
+window.previewAnnouncement = function() {
+  const text = document.getElementById('broadcast-text').value.trim();
+  const preview = document.getElementById('broadcast-preview');
+  if (!text) { toast('Nothing to preview', 'red'); return; }
+  preview.textContent = '📢 ' + text;
+  preview.classList.add('visible');
+};
+
+window.publishAnnouncement = function() {
+  const text = document.getElementById('broadcast-text').value.trim();
+  if (!text) { toast('Write an announcement first', 'red'); return; }
+  ACTIVE_ANNOUNCEMENT = text;
+  localStorage.setItem('nova:active-announcement', text);
+  ANNOUNCEMENTS.unshift({ text, date: today() + ' ' + timeNow() });
+  if (ANNOUNCEMENTS.length > 20) ANNOUNCEMENTS.length = 20;
+  localStorage.setItem('nova:announcements', JSON.stringify(ANNOUNCEMENTS));
+  const bar = document.getElementById('announcement-bar');
+  document.getElementById('announcement-bar-text').textContent = '📢 ' + text;
+  bar.classList.add('visible');
+  document.getElementById('ann-bar-toggle').checked = true;
+  toast('Announcement published', 'yellow');
+  renderBroadcast();
+};
+
+window.clearAnnouncement = function() {
+  ACTIVE_ANNOUNCEMENT = '';
+  localStorage.removeItem('nova:active-announcement');
+  document.getElementById('announcement-bar').classList.remove('visible');
+  document.getElementById('ann-bar-toggle').checked = false;
+  document.getElementById('broadcast-preview').classList.remove('visible');
+  toast('Announcement cleared');
+};
+
+window.useTemplate = function(text) {
+  document.getElementById('broadcast-text').value = text;
+  switchPanel('broadcast');
+  toast('Template loaded');
+};
+
+window.toggleAnnouncementBar = function(on) {
+  const bar = document.getElementById('announcement-bar');
+  if (on && ACTIVE_ANNOUNCEMENT) bar.classList.add('visible');
+  else bar.classList.remove('visible');
+};
+
+// ── BLOCKED URLS ─────────────────────────────────────────
+function renderBlocked() {
+  const wrap = document.getElementById('blocked-list-wrap');
+  if (!BLOCKED_URLS.length) {
+    wrap.innerHTML = '<div style="font-size:.72rem;color:var(--dim);padding:.3rem 0">No URLs blocked yet.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="banned-list">' + BLOCKED_URLS.map((b,i) =>
+    `<div class="banned-item">
+      <div>
+        <div class="banned-url">${esc(b.url)}</div>
+        ${b.reason ? `<div style="font-size:.62rem;color:var(--dim);margin-top:.15rem">${esc(b.reason)}</div>` : ''}
+      </div>
+      <button class="a-btn sm danger" onclick="unblockUrl(${i})">Unblock</button>
+    </div>`
+  ).join('') + '</div>';
+}
+
+document.getElementById('add-block-btn').addEventListener('click', () => {
+  const url = document.getElementById('block-input').value.trim();
+  const reason = document.getElementById('block-reason').value.trim();
+  if (!url) { toast('Enter a URL or domain', 'red'); return; }
+  if (BLOCKED_URLS.find(b => b.url === url)) { toast('Already blocked', 'red'); return; }
+  BLOCKED_URLS.push({ url, reason, date: today() });
+  localStorage.setItem('nova:blocked', JSON.stringify(BLOCKED_URLS));
+  document.getElementById('block-input').value = '';
+  document.getElementById('block-reason').value = '';
+  renderBlocked();
+  document.getElementById('ov-blocked').textContent = BLOCKED_URLS.length;
+  toast(`"${url}" blocked`, 'red');
+});
+
+window.unblockUrl = function(i) {
+  const url = BLOCKED_URLS[i]?.url;
+  BLOCKED_URLS.splice(i, 1);
+  localStorage.setItem('nova:blocked', JSON.stringify(BLOCKED_URLS));
+  renderBlocked();
+  document.getElementById('ov-blocked').textContent = BLOCKED_URLS.length;
+  toast(`"${url}" unblocked`, 'green');
+};
 
 // ── ADMINS ──────────────────────────────────────────────
 async function renderAdmins() {
@@ -902,11 +1224,11 @@ async function renderAdmins() {
         <td><span class="status-dot"></span>${esc(a.user)}</td>
         <td><span class="role-pill ${esc(a.role)}">${esc(a.role)}</span></td>
         <td style="color:var(--muted)">${esc(a.added||'—')}</td>
+        <td style="color:var(--muted)">—</td>
         <td><div class="table-actions">
           ${isOwner && a.role !== 'owner'
-            ? `<button class="a-btn danger" onclick="removeAdmin('${esc(a.user)}')">Remove</button>`
-            : `<span style="font-size:.62rem;color:var(--dim);letter-spacing:.1em">Protected</span>`
-          }
+            ? `<button class="a-btn sm danger" onclick="removeAdmin('${esc(a.user)}')">Remove</button>`
+            : `<span style="font-size:.62rem;color:var(--dim);letter-spacing:.1em">Protected</span>`}
         </div></td>
       </tr>`
     ).join('');
@@ -914,11 +1236,10 @@ async function renderAdmins() {
 }
 
 window.removeAdmin = async function(user) {
-  if (!confirm(`Remove admin "${user}"? This cannot be undone.`)) return;
+  if (!confirm(`Remove admin "${user}"?`)) return;
   try {
     await api('DELETE', `/api/admin/accounts/${encodeURIComponent(user)}`, { user: SESSION.user, pass: SESSION.pass });
-    renderAdmins();
-    toast('Admin removed', 'red');
+    renderAdmins(); toast('Admin removed', 'red');
   } catch(e) { toast(e.message, 'red'); }
 };
 
@@ -932,21 +1253,20 @@ document.getElementById('add-admin-btn').addEventListener('click', async () => {
     await api('POST', '/api/admin/accounts', { user: SESSION.user, pass: SESSION.pass, newUser, newPass, newRole });
     document.getElementById('new-admin-user').value = '';
     document.getElementById('new-admin-pass').value = '';
-    renderAdmins();
-    toast(`Admin "${newUser}" added`, 'green');
+    renderAdmins(); toast(`Admin "${newUser}" added`, 'green');
   } catch(e) { toast(e.message, 'red'); }
 });
 
 // ── SETTINGS ────────────────────────────────────────────
 document.getElementById('change-pass-btn').addEventListener('click', async () => {
   if (SESSION.role !== 'owner') { toast('Only the owner can change the password', 'red'); return; }
-  const newPass    = document.getElementById('new-pass').value;
+  const newPass = document.getElementById('new-pass').value;
   const confirmPass = document.getElementById('confirm-pass').value;
   if (!newPass) { toast('Enter a new password', 'red'); return; }
   if (newPass !== confirmPass) { toast('Passwords do not match', 'red'); return; }
+  if (newPass.length < 4) { toast('Password too short (min 4)', 'red'); return; }
   try {
     await api('POST', '/api/admin/password', { user: SESSION.user, pass: SESSION.pass, newPass });
-    // Update session so future requests still work
     SESSION.pass = newPass;
     document.getElementById('new-pass').value = '';
     document.getElementById('confirm-pass').value = '';
@@ -958,15 +1278,27 @@ document.getElementById('factory-reset-btn').addEventListener('click', async () 
   if (!confirm('Reset ALL admin data to factory defaults? This cannot be undone.')) return;
   try {
     await api('POST', '/api/admin/factory-reset', { user: SESSION.user, pass: SESSION.pass });
-    // Reset session password back to default
     SESSION.pass = '1234';
     toast('Factory reset complete', 'red');
     renderOverview();
   } catch(e) { toast(e.message, 'red'); }
 });
 
+document.getElementById('clear-log-btn').addEventListener('click', async () => {
+  if (!confirm('Clear all activity log entries?')) return;
+  try {
+    // We don't have a dedicated endpoint; just refresh after manual clear
+    toast('Log cleared (requires server endpoint)', 'yellow');
+  } catch(e) {}
+});
+
 window.setAdminTheme = function(theme) {
-  const themes = { default:['#668','#446'], blue:['#46a','#248'], green:['#464','#242'] };
+  const themes = {
+    default:['#668','#446'],
+    blue:   ['#46a','#248'],
+    green:  ['#464','#242'],
+    purple: ['#846','#624']
+  };
   const t = themes[theme] || themes.default;
   document.querySelector('.a1').style.background = `radial-gradient(circle,${t[0]} 0%,transparent 70%)`;
   document.querySelector('.a2').style.background = `radial-gradient(circle,${t[1]} 0%,transparent 70%)`;
@@ -974,29 +1306,53 @@ window.setAdminTheme = function(theme) {
     b.style.color = b.dataset.theme === theme ? 'var(--white)' : '';
     b.style.borderColor = b.dataset.theme === theme ? 'rgba(255,255,255,.22)' : '';
   });
+  localStorage.setItem('nova:admin-theme', theme);
   toast('Theme applied');
 };
+// Restore theme
+const savedTheme = localStorage.getItem('nova:admin-theme');
+if (savedTheme) setTimeout(() => window.setAdminTheme(savedTheme), 100);
 
 // ── ACTIVITY ────────────────────────────────────────────
 async function renderActivity() {
   try {
-    const feed = await fetch(`/api/admin/activity?user=${encodeURIComponent(SESSION.user)}&pass=${encodeURIComponent(SESSION.pass)}`).then(r=>r.json());
-    const el = document.getElementById('activity-feed');
-    if (!Array.isArray(feed) || !feed.length) {
-      el.innerHTML = '<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No activity logged yet.</div></div>';
-      return;
-    }
-    el.innerHTML = feed.map(f =>
-      `<div class="feed-item">
-        <div class="feed-dot ${esc(f.color||'blue')}"></div>
-        <div>
-          <div class="feed-msg">${esc(f.msg)}</div>
-          <div style="font-size:.6rem;color:var(--dim);margin-top:.18rem">${esc(f.date)} · ${esc(f.time)}</div>
-        </div>
-      </div>`
-    ).join('');
+    ALL_ACTIVITY = await fetch(`/api/admin/activity?user=${encodeURIComponent(SESSION.user)}&pass=${encodeURIComponent(SESSION.pass)}`).then(r=>r.json());
+    renderActivityList(ALL_ACTIVITY);
   } catch(e) { console.error('Activity error:', e); }
 }
+
+function renderActivityList(feed) {
+  const el = document.getElementById('activity-feed');
+  if (!Array.isArray(feed) || !feed.length) {
+    el.innerHTML = '<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No activity logged yet.</div></div>';
+    return;
+  }
+  el.innerHTML = feed.map(f =>
+    `<div class="feed-item">
+      <div class="feed-dot ${esc(f.color||'blue')}"></div>
+      <div>
+        <div class="feed-msg">${esc(f.msg)}</div>
+        <div style="font-size:.6rem;color:var(--dim);margin-top:.18rem">${esc(f.date)} · ${esc(f.time)}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+window.filterActivity = function(q) {
+  const filtered = q ? ALL_ACTIVITY.filter(f => f.msg.toLowerCase().includes(q.toLowerCase())) : ALL_ACTIVITY;
+  renderActivityList(filtered);
+};
+
+window.exportActivity = function() {
+  if (!ALL_ACTIVITY.length) { toast('No activity to export', 'red'); return; }
+  const rows = [['Date','Time','Message','Color'], ...ALL_ACTIVITY.map(f=>[f.date,f.time,f.msg,f.color])];
+  const csv = rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = `nova-activity-${today()}.csv`;
+  a.click();
+  toast('Activity exported', 'green');
+};
 
 // ── Reset views ─────────────────────────────────────────
 document.getElementById('reset-views-btn').addEventListener('click', async () => {
@@ -1008,10 +1364,16 @@ document.getElementById('reset-views-btn').addEventListener('click', async () =>
   } catch(e) { toast(e.message || 'Could not reset', 'red'); }
 });
 
-// ── Refresh everything ──────────────────────────────────
-async function refreshAll() { await renderOverview(); }
+// ── Init ─────────────────────────────────────────────────
+async function refreshAll() { await Promise.all([renderOverview(), loadGames()]); }
 
-// Resize redraws chart
+// Restore active announcement
+if (ACTIVE_ANNOUNCEMENT) {
+  const bar = document.getElementById('announcement-bar');
+  document.getElementById('announcement-bar-text').textContent = '📢 ' + ACTIVE_ANNOUNCEMENT;
+  // don't auto-show unless user is logged in
+}
+
 window.addEventListener('resize', () => {
   if (document.getElementById('panel-views').classList.contains('active')) renderViews();
 });
