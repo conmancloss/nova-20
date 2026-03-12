@@ -187,59 +187,21 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
     </div>
     <div class="lock-title">NOVA ADMIN</div>
     <div class="lock-sub">Restricted access</div>
-    <div id="l-credentials">
-      <div class="lock-field">
-        <label class="lock-label" for="l-user">Username</label>
-        <input class="lock-input" id="l-user" type="text" autocomplete="username" spellcheck="false" placeholder="admin"/>
-      </div>
-      <div class="lock-field">
-        <label class="lock-label" for="l-pass">Password</label>
-        <input class="lock-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••"/>
-      </div>
+    <div class="lock-field">
+      <label class="lock-label" for="l-user">Username</label>
+      <input class="lock-input" id="l-user" type="text" autocomplete="username" spellcheck="false" placeholder="admin"/>
     </div>
-    <div id="l-2fa-section" style="display:none">
-      <div class="lock-field">
-        <label class="lock-label" for="l-totp">2FA Code</label>
-        <input class="lock-input" id="l-totp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="000 000" maxlength="7" style="letter-spacing:.2em;text-align:center;font-size:1.1rem;"/>
-      </div>
-      <div style="font-size:.6rem;color:var(--dim);text-align:center;margin-bottom:.5rem;letter-spacing:.12em">Enter the 6-digit code from your authenticator app</div>
+    <div class="lock-field">
+      <label class="lock-label" for="l-pass">Password</label>
+      <input class="lock-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••"/>
     </div>
     <div class="lock-err" id="l-err"></div>
     <button class="lock-btn" id="l-submit">Enter</button>
-    <button class="lock-back" id="l-2fa-back" style="display:none;font-size:.6rem;color:var(--dim);margin-top:.5rem" onclick="cancelTwoFa()">← Back to login</button>
     <button class="lock-back" onclick="window.location.href='/'">← Back to Nova</button>
   </div>
 </div>
 
-<!-- 2FA Setup Modal -->
-<div id="totp-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
-  <div class="lock-card" style="max-width:400px;width:90vw;">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.18em;color:var(--white);text-align:center;margin-bottom:.5rem;">SETUP 2FA</div>
-    <div style="font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:1.2rem;letter-spacing:.12em">Scan the QR code with Google Authenticator, Authy, or any TOTP app</div>
-    <div id="totp-qr" style="display:flex;justify-content:center;margin-bottom:1rem;"></div>
-    <div style="font-size:.6rem;color:var(--dim);text-align:center;margin-bottom:.3rem;letter-spacing:.12em">Or enter this secret manually:</div>
-    <div id="totp-secret-display" style="font-family:monospace;font-size:.78rem;color:var(--text);text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:.5rem;margin-bottom:1rem;letter-spacing:.15em;word-break:break-all;"></div>
-    <div class="lock-field">
-      <label class="lock-label">Verify — Enter the 6-digit code to confirm</label>
-      <input class="lock-input" id="totp-verify-input" type="text" inputmode="numeric" placeholder="000000" maxlength="6"/>
-    </div>
-    <div class="lock-err" id="totp-modal-err"></div>
-    <button class="lock-btn" onclick="confirmTotpSetup()">Activate 2FA</button>
-    <button class="lock-back" onclick="closeTotpModal()">Cancel</button>
-  </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div id="confirm-modal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-  <div style="width:min(360px,88vw);background:rgba(20,20,24,.98);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:2rem 1.8rem 1.6rem;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:rise .22s ease both;">
-    <div style="font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem" id="confirm-eyebrow">Confirm Action</div>
-    <div style="font-size:.92rem;color:var(--white);line-height:1.55;margin-bottom:1.4rem" id="confirm-msg"></div>
-    <div style="display:flex;gap:.6rem;justify-content:flex-end;">
-      <button class="a-btn" id="confirm-cancel-btn">Cancel</button>
-      <button class="a-btn danger" id="confirm-ok-btn">Confirm</button>
-    </div>
-  </div>
-</div>
+<!-- SHELL -->
 <div id="admin-shell">
   <aside class="sidebar">
     <div class="sb-brand">
@@ -267,9 +229,6 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
       <div class="sb-section-label">Admin</div>
       <button class="sb-item" data-panel="admins">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>Admins</span>
-      </button>
-      <button class="sb-item" data-panel="security">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Security</span>
       </button>
       <button class="sb-item" data-panel="settings">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span>
@@ -476,103 +435,6 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
       </div>
     </div>
 
-    <!-- SECURITY -->
-    <div class="admin-panel" id="panel-security">
-
-      <!-- Login Attempt Log -->
-      <div class="a-section-row">
-        <span class="a-section" style="margin:0">Login Attempt Log</span>
-        <button class="a-btn sm" onclick="exportLoginLog()">Export CSV</button>
-      </div>
-      <div class="a-block">
-        <div style="display:flex;gap:.5rem;padding:.7rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;">
-          <input class="a-input" id="log-filter-user" placeholder="Filter by user…" style="max-width:140px" oninput="renderLoginLog()"/>
-          <select id="log-filter-status" style="padding:.28rem .55rem;background:rgba(255,255,255,.04);border:1px solid var(--glass-b);border-radius:var(--r-sm);color:var(--text);font-family:'Lato',sans-serif;font-size:.76rem;outline:none;" onchange="renderLoginLog()">
-            <option value="">All</option><option value="success">Success</option><option value="fail">Failed</option>
-          </select>
-        </div>
-        <div id="login-log-body"></div>
-      </div>
-
-      <!-- Account Lockouts -->
-      <div class="a-section">Account Lockouts</div>
-      <div class="a-block" id="lockout-list-body">
-        <div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No locked accounts.</div></div>
-      </div>
-
-      <!-- IP Bans -->
-      <div class="a-section-row">
-        <span class="a-section" style="margin:0">IP Bans</span>
-      </div>
-      <div class="a-block">
-        <div class="a-row" style="flex-wrap:wrap;gap:.7rem;">
-          <div style="flex:1;min-width:200px">
-            <div class="a-label">Ban an IP Address</div>
-            <div class="a-desc">Blocks that IP from logging in. Supports IPv4 and IPv6.</div>
-          </div>
-          <div class="form-row">
-            <input class="a-input" id="ban-ip" placeholder="192.168.1.1" style="max-width:160px" spellcheck="false"/>
-            <input class="a-input" id="ban-reason" placeholder="Reason (optional)" style="max-width:160px"/>
-            <input class="a-input" id="ban-expires" type="datetime-local" style="max-width:190px" title="Leave blank for permanent"/>
-            <button class="a-btn danger" onclick="addIpBan()">Ban IP</button>
-          </div>
-        </div>
-      </div>
-      <div class="a-block" id="ip-bans-body">
-        <div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No IPs currently banned.</div></div>
-      </div>
-
-      <!-- Active Sessions -->
-      <div class="a-section">Active Sessions</div>
-      <div class="a-block" id="sessions-body">
-        <div class="feed-item"><div class="feed-msg" style="color:var(--dim)">Loading sessions…</div></div>
-      </div>
-
-      <!-- 2FA -->
-      <div class="a-section">Two-Factor Authentication (TOTP)</div>
-      <div class="a-block">
-        <div class="a-row">
-          <div><div class="a-label">Your 2FA Status</div><div class="a-desc" id="totp-status-desc">Checking…</div></div>
-          <div class="form-row">
-            <button class="a-btn success" id="totp-enable-btn" style="display:none" onclick="startTotpSetup()">Enable 2FA</button>
-            <button class="a-btn danger" id="totp-disable-btn" style="display:none" onclick="disableTotp()">Disable 2FA</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Security Settings -->
-      <div class="a-section">Security Settings <span style="font-size:.5rem;color:rgba(255,220,100,.5);letter-spacing:.12em">(owner only)</span></div>
-      <div class="a-block" id="sec-settings-block">
-        <div class="a-row">
-          <div><div class="a-label">Lockout Threshold</div><div class="a-desc">Failed attempts before account is locked</div></div>
-          <div class="form-row">
-            <input class="a-input" id="sec-lockout-threshold" type="number" min="1" max="20" value="5" style="max-width:80px"/>
-            <span style="font-size:.7rem;color:var(--muted)">attempts</span>
-          </div>
-        </div>
-        <div class="a-row">
-          <div><div class="a-label">Lockout Duration</div><div class="a-desc">How long the account stays locked</div></div>
-          <div class="form-row">
-            <input class="a-input" id="sec-lockout-mins" type="number" min="1" max="1440" value="15" style="max-width:80px"/>
-            <span style="font-size:.7rem;color:var(--muted)">minutes</span>
-          </div>
-        </div>
-        <div class="a-row">
-          <div><div class="a-label">Session Timeout</div><div class="a-desc">Auto-logout after inactivity</div></div>
-          <div class="form-row">
-            <input class="a-input" id="sec-session-timeout" type="number" min="5" max="1440" value="60" style="max-width:80px"/>
-            <span style="font-size:.7rem;color:var(--muted)">minutes</span>
-          </div>
-        </div>
-        <div class="a-row">
-          <div style="display:flex;gap:.5rem;padding-top:.2rem;align-self:flex-end;margin-left:auto;">
-            <button class="a-btn primary" id="sec-save-btn" onclick="saveSecSettings()">Save Settings</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
     <!-- SETTINGS -->
     <div class="admin-panel" id="panel-settings">
       <div class="a-section">Security</div>
@@ -631,9 +493,6 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
 //  NOVA ADMIN — all state in Redis, no localStorage
 // ════════════════════════════════════════════════════════
 let SESSION = null, CHART_RANGE = 7, ALL_ACTIVITY = [];
-let _pendingTwoFaUser = null, _pendingTwoFaPass = null;
-let _heartbeatTimer = null, _autoLogoutTimer = null;
-let _loginLogData = [];
 
 const todayKey = () => new Date().toISOString().slice(0,10);
 const fmt = n => n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n||0);
@@ -655,22 +514,7 @@ function toast(msg, type) {
   setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),320); },2800);
 }
 
-// ── Confirmation modal (replaces all confirm() calls) ────
-function showConfirm(msg, onOk, { eyebrow='Confirm Action', okLabel='Confirm', danger=true } = {}) {
-  const modal = document.getElementById('confirm-modal');
-  document.getElementById('confirm-msg').textContent = msg;
-  document.getElementById('confirm-eyebrow').textContent = eyebrow;
-  const okBtn = document.getElementById('confirm-ok-btn');
-  okBtn.textContent = okLabel;
-  okBtn.className = 'a-btn ' + (danger ? 'danger' : 'primary');
-  modal.style.display = 'flex';
-  const close = () => { modal.style.display = 'none'; okBtn.removeEventListener('click', handleOk); document.getElementById('confirm-cancel-btn').removeEventListener('click', close); };
-  const handleOk = () => { close(); onOk(); };
-  okBtn.addEventListener('click', handleOk);
-  document.getElementById('confirm-cancel-btn').addEventListener('click', close);
-}
-
-
+setInterval(()=>{
   const d=new Date();
   document.getElementById('topbar-time').textContent =
     d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+
@@ -678,102 +522,41 @@ function showConfirm(msg, onOk, { eyebrow='Confirm Action', okLabel='Confirm', d
 },1000);
 
 // ── Login ────────────────────────────────────────────────
-document.getElementById('l-totp').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
 document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
 document.getElementById('l-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('l-pass').focus();});
 document.getElementById('l-submit').addEventListener('click',login);
 
-function cancelTwoFa(){
-  _pendingTwoFaUser=null;_pendingTwoFaPass=null;
-  document.getElementById('l-credentials').style.display='';
-  document.getElementById('l-2fa-section').style.display='none';
-  document.getElementById('l-2fa-back').style.display='none';
-  document.getElementById('l-totp').value='';
-  document.getElementById('l-err').textContent='';
-  document.getElementById('l-submit').textContent='Enter';
-}
-
 async function login() {
-  const user = _pendingTwoFaUser || document.getElementById('l-user').value.trim();
-  const pass = _pendingTwoFaPass || document.getElementById('l-pass').value;
-  const totpToken = document.getElementById('l-totp').value.replace(/\s/g,'');
+  const user=document.getElementById('l-user').value.trim();
+  const pass=document.getElementById('l-pass').value;
   document.getElementById('l-err').textContent='';
   document.getElementById('l-submit').textContent='...';
   try {
-    const body = {user, pass};
-    if (totpToken) body.totpToken = totpToken;
-    // Use raw fetch so we can read the response body even on 401 (for requires2fa flag)
-    const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const d = await r.json();
-    if (!r.ok) {
-      if (d.requires2fa) {
-        // Show 2FA step
-        _pendingTwoFaUser=user; _pendingTwoFaPass=pass;
-        document.getElementById('l-credentials').style.display='none';
-        document.getElementById('l-2fa-section').style.display='';
-        document.getElementById('l-2fa-back').style.display='block';
-        document.getElementById('l-submit').textContent='Verify';
-        document.getElementById('l-totp').focus();
-        return;
-      }
-      throw new Error(d.error || 'Login failed');
-    }
-    SESSION={user, pass, role:d.role, token:d.sessionToken};
-    _pendingTwoFaUser=null; _pendingTwoFaPass=null;
-    cancelTwoFa();
+    const d=await api('POST','/api/admin/login',{user,pass});
+    SESSION={user,pass,role:d.role};
     document.getElementById('lock').style.display='none';
     document.getElementById('admin-shell').classList.add('visible');
     document.getElementById('sb-username').textContent=user;
     document.getElementById('sb-avatar').textContent=user[0].toUpperCase();
     document.getElementById('sb-role-label').textContent=d.role.charAt(0).toUpperCase()+d.role.slice(1);
-    startSessionTracking();
     renderOverview();
   } catch(e) {
-    if (!_pendingTwoFaUser) {
-      ['l-user','l-pass'].forEach(id=>{const el=document.getElementById(id);el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);});
-      document.getElementById('l-pass').value='';
-    } else {
-      const el=document.getElementById('l-totp');el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);
-      document.getElementById('l-totp').value='';
-    }
-    document.getElementById('l-err').textContent=e.message||'Login failed';
-  } finally { document.getElementById('l-submit').textContent=_pendingTwoFaUser?'Verify':'Enter'; }
+    ['l-user','l-pass'].forEach(id=>{const el=document.getElementById(id);el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);});
+    document.getElementById('l-err').textContent='Invalid username or password';
+    document.getElementById('l-pass').value='';
+  } finally { document.getElementById('l-submit').textContent='Enter'; }
 }
 
-// ── Session heartbeat & auto-logout ─────────────────────
-function startSessionTracking(){
-  clearInterval(_heartbeatTimer);
-  clearTimeout(_autoLogoutTimer);
-  if(SESSION&&SESSION.token){
-    _heartbeatTimer=setInterval(async()=>{
-      try{await api('POST','/api/admin/sessions/heartbeat',{token:SESSION.token});}catch(e){}
-    },60000);
-  }
-  resetAutoLogout();
-  ['mousemove','keydown','click','scroll'].forEach(ev=>document.addEventListener(ev,resetAutoLogout,{passive:true}));
-}
-function resetAutoLogout(){
-  clearTimeout(_autoLogoutTimer);
-  const timeout = (SESSION&&SESSION.sessionTimeoutMinutes)||60;
-  _autoLogoutTimer=setTimeout(()=>{
-    toast('Session expired — logging out','yellow');
-    setTimeout(doLogout,1500);
-  }, timeout*60*1000);
-}
-function doLogout(){
-  clearInterval(_heartbeatTimer);
-  clearTimeout(_autoLogoutTimer);
+document.getElementById('sb-logout').addEventListener('click',()=>{
   SESSION=null;
   document.getElementById('admin-shell').classList.remove('visible');
   document.getElementById('lock').style.display='flex';
   document.getElementById('l-pass').value='';
   document.getElementById('l-user').value='';
-}
-
-document.getElementById('sb-logout').addEventListener('click',doLogout);
+});
 
 // ── Panels ───────────────────────────────────────────────
-const PM={overview:{title:'OVERVIEW',sub:'Everything at a glance'},views:{title:'ANALYTICS',sub:'Traffic & charts'},health:{title:'HEALTH',sub:'System diagnostics'},broadcast:{title:'BROADCAST',sub:'Announcements for all users'},blocked:{title:'BLOCKED URLS',sub:'Redis-backed proxy access control'},admins:{title:'ADMINS',sub:'Access management'},security:{title:'SECURITY',sub:'Auth, sessions, IP bans & 2FA'},settings:{title:'SETTINGS',sub:'Console configuration'},activity:{title:'ACTIVITY',sub:'Admin action log'}};
+const PM={overview:{title:'OVERVIEW',sub:'Everything at a glance'},views:{title:'ANALYTICS',sub:'Traffic & charts'},health:{title:'HEALTH',sub:'System diagnostics'},broadcast:{title:'BROADCAST',sub:'Announcements for all users'},blocked:{title:'BLOCKED URLS',sub:'Redis-backed proxy access control'},admins:{title:'ADMINS',sub:'Access management'},settings:{title:'SETTINGS',sub:'Console configuration'},activity:{title:'ACTIVITY',sub:'Admin action log'}};
 function switchPanel(name) {
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));
@@ -786,7 +569,6 @@ function switchPanel(name) {
   if(name==='broadcast')renderBroadcast();
   if(name==='blocked')  renderBlocked();
   if(name==='admins')   renderAdmins();
-  if(name==='security') renderSecurity();
   if(name==='activity') renderActivity();
 }
 document.querySelectorAll('.sb-item').forEach(b=>b.addEventListener('click',()=>switchPanel(b.dataset.panel)));
@@ -872,10 +654,9 @@ document.getElementById('export-views-btn').addEventListener('click',async()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nova-views-${todayKey()}.csv`;a.click();
   toast('Exported','green');}catch(e){toast('Export failed','red');}
 });
-document.getElementById('reset-views-btn').addEventListener('click',()=>{
-  showConfirm('Reset all view counts in Redis? This cannot be undone.', async () => {
-    try{await api('POST','/api/views/reset',{user:SESSION.user,pass:SESSION.pass});toast('Counter reset','red');renderViews();}catch(e){toast(e.message,'red');}
-  });
+document.getElementById('reset-views-btn').addEventListener('click',async()=>{
+  if(!confirm('Reset all view counts in Redis?'))return;
+  try{await api('POST','/api/views/reset',{user:SESSION.user,pass:SESSION.pass});toast('Counter reset','red');renderViews();}catch(e){toast(e.message,'red');}
 });
 
 // ── HEALTH ───────────────────────────────────────────────
@@ -987,16 +768,15 @@ window.publishBroadcast=async function(){
   }catch(e){toast(e.message,'red');}
   finally{btn.disabled=false;btn.textContent='Publish to All Users';}
 };
-window.clearBroadcast=function(){
-  showConfirm('Remove the active broadcast? All users will stop seeing it.', async () => {
-    try{
-      await api('POST','/api/broadcast',{user:SESSION.user,pass:SESSION.pass,text:''});
-      toast('Broadcast cleared');
-      updateBcActiveUI({});
-      document.getElementById('ov-bc').textContent='OFF';
-      document.getElementById('ov-bc').style.color='';
-    }catch(e){toast(e.message,'red');}
-  });
+window.clearBroadcast=async function(){
+  if(!confirm('Remove the active broadcast?'))return;
+  try{
+    await api('POST','/api/broadcast',{user:SESSION.user,pass:SESSION.pass,text:''});
+    toast('Broadcast cleared');
+    updateBcActiveUI({});
+    document.getElementById('ov-bc').textContent='OFF';
+    document.getElementById('ov-bc').style.color='';
+  }catch(e){toast(e.message,'red');}
 };
 
 // ── BLOCKED URLS ─────────────────────────────────────────
@@ -1048,18 +828,18 @@ document.getElementById('add-block-btn').addEventListener('click',async()=>{
 });
 
 window.unblockUrl=async function(url){
+  if(!confirm(`Unblock "${url}"?`))return;
   try{await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url});toast(`"${url}" unblocked`,'green');renderBlocked();}
   catch(e){toast(e.message,'red');}
 };
 
-window.clearAllBlocks=function(){
-  showConfirm('Clear ALL blocked URLs from Redis? This cannot be undone.', async () => {
-    try{
-      const list=await fetch(`/api/blocked/admin?${authQ()}`).then(r=>r.json());
-      for(const b of list) await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url:b.url});
-      toast('All blocks cleared','green');renderBlocked();
-    }catch(e){toast(e.message,'red');}
-  });
+window.clearAllBlocks=async function(){
+  if(!confirm('Clear ALL blocked URLs from Redis?'))return;
+  try{
+    const list=await fetch(`/api/blocked/admin?${authQ()}`).then(r=>r.json());
+    for(const b of list) await api('DELETE','/api/blocked',{user:SESSION.user,pass:SESSION.pass,url:b.url});
+    toast('All blocks cleared','green');renderBlocked();
+  }catch(e){toast(e.message,'red');}
 };
 
 // ── ADMINS ───────────────────────────────────────────────
@@ -1074,11 +854,10 @@ async function renderAdmins(){
     ).join('');
   }catch(e){toast('Could not load admins','red');}
 }
-window.removeAdmin=function(user){
-  showConfirm(`Remove admin "${user}"? They will lose all access immediately.`, async () => {
-    try{await api('DELETE',`/api/admin/accounts/${encodeURIComponent(user)}`,{user:SESSION.user,pass:SESSION.pass});renderAdmins();toast('Admin removed','red');}
-    catch(e){toast(e.message,'red');}
-  });
+window.removeAdmin=async function(user){
+  if(!confirm(`Remove admin "${user}"?`))return;
+  try{await api('DELETE',`/api/admin/accounts/${encodeURIComponent(user)}`,{user:SESSION.user,pass:SESSION.pass});renderAdmins();toast('Admin removed','red');}
+  catch(e){toast(e.message,'red');}
 };
 document.getElementById('add-admin-btn').addEventListener('click',async()=>{
   const newUser=document.getElementById('new-admin-user').value.trim();
@@ -1097,11 +876,10 @@ document.getElementById('change-pass-btn').addEventListener('click',async()=>{
   try{await api('POST','/api/admin/password',{user:SESSION.user,pass:SESSION.pass,newPass:np});SESSION.pass=np;document.getElementById('new-pass').value='';document.getElementById('confirm-pass').value='';toast('Password updated','green');}
   catch(e){toast(e.message,'red');}
 });
-document.getElementById('factory-reset-btn').addEventListener('click',()=>{
-  showConfirm('Factory reset ALL data from Redis? This wipes all admins, views, blocks, and activity. Cannot be undone.', async () => {
-    try{await api('POST','/api/admin/factory-reset',{user:SESSION.user,pass:SESSION.pass});SESSION.pass='1234';toast('Factory reset complete','red');renderOverview();}
-    catch(e){toast(e.message,'red');}
-  }, {okLabel:'Reset Everything', danger:true});
+document.getElementById('factory-reset-btn').addEventListener('click',async()=>{
+  if(!confirm('Factory reset ALL data from Redis?'))return;
+  try{await api('POST','/api/admin/factory-reset',{user:SESSION.user,pass:SESSION.pass});SESSION.pass='1234';toast('Factory reset complete','red');renderOverview();}
+  catch(e){toast(e.message,'red');}
 });
 window.setAdminTheme=function(theme){
   const themes={default:['#668','#446'],blue:['#46a','#248'],green:['#464','#242'],purple:['#846','#624']};
@@ -1130,242 +908,6 @@ window.exportActivity=function(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nova-activity-${todayKey()}.csv`;a.click();
   toast('Exported','green');
 };
-
-// ══════════════════════════════════════════════════════
-//  SECURITY PANEL
-// ══════════════════════════════════════════════════════
-async function renderSecurity(){
-  await Promise.all([renderLoginLog(), renderLockouts(), renderIpBans(), renderActiveSessions(), renderTotpStatus(), loadSecSettings()]);
-}
-
-// ── Login Log ────────────────────────────────────────────
-async function fetchLoginLog(){
-  const data=await fetch(`/api/admin/login-log?${authQ()}`).then(r=>r.json());
-  _loginLogData=Array.isArray(data)?data:[];
-}
-function renderLoginLog(){
-  if(!_loginLogData.length){
-    // Try fetch first if empty
-    fetchLoginLog().then(()=>renderLoginLog()).catch(()=>{});
-    return;
-  }
-  const userFilter=document.getElementById('log-filter-user')?.value?.toLowerCase()||'';
-  const statusFilter=document.getElementById('log-filter-status')?.value||'';
-  let list=_loginLogData;
-  if(userFilter) list=list.filter(l=>(l.user||'').toLowerCase().includes(userFilter));
-  if(statusFilter==='success') list=list.filter(l=>l.success);
-  if(statusFilter==='fail') list=list.filter(l=>!l.success);
-  const el=document.getElementById('login-log-body');
-  if(!el) return;
-  if(!list.length){el.innerHTML='<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No login attempts recorded yet.</div></div>';return;}
-  el.innerHTML=list.slice(0,50).map(l=>`
-    <div class="feed-item">
-      <div class="feed-dot ${l.success?'green':'red'}"></div>
-      <div style="flex:1">
-        <div style="font-size:.76rem;color:var(--text)">${esc(l.user||'?')} — <span style="color:${l.success?'rgba(110,220,150,.7)':'rgba(248,113,113,.7)'}; font-size:.7rem">${l.success?'✓ Success':'✗ Failed'}${l.reason&&!l.success?' ('+esc(l.reason)+')':''}</span></div>
-        <div style="font-size:.58rem;color:var(--dim);margin-top:.12rem">${esc(l.ip||'?')} · ${esc(l.date||'')} ${esc(l.time||'')} · <span style="font-family:monospace;font-size:.58rem">${esc((l.ua||'').slice(0,60))}</span></div>
-      </div>
-    </div>`).join('');
-}
-async function loadAndRenderLoginLog(){
-  await fetchLoginLog();
-  renderLoginLog();
-}
-// Initial load when security panel first opens
-async function ensureLoginLog(){
-  if(!_loginLogData.length) await fetchLoginLog();
-  renderLoginLog();
-}
-window.exportLoginLog=function(){
-  if(!_loginLogData.length){toast('No login log to export','red');return;}
-  const rows=[['Date','Time','User','IP','UA','Success','Reason'],..._loginLogData.map(l=>[l.date,l.time,l.user,l.ip,(l.ua||'').replace(/"/g,"'"),l.success?'yes':'no',l.reason||''])];
-  const blob=new Blob([rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n')],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nova-login-log-${todayKey()}.csv`;a.click();
-  toast('Exported','green');
-};
-
-// ── Lockouts ─────────────────────────────────────────────
-async function renderLockouts(){
-  try{
-    const data=await fetch(`/api/admin/login-log?${authQ()}`).then(r=>r.json());
-    _loginLogData=Array.isArray(data)?data:[];
-    renderLoginLog();
-    // Check for locked accounts from login attempts key (approximation via activity log)
-    const el=document.getElementById('lockout-list-body');
-    if(!el)return;
-    // Get security settings to show lockout threshold info
-    const settings=await fetch(`/api/admin/security-settings?${authQ()}`).then(r=>r.json()).catch(()=>({}));
-    const recent=_loginLogData.filter(l=>!l.success&&l.reason==='locked');
-    const locked=new Set(recent.map(l=>l.user));
-    if(!locked.size){el.innerHTML='<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No locked accounts.</div></div>';return;}
-    el.innerHTML=[...locked].map(u=>`
-      <div class="feed-item">
-        <div class="feed-dot red"></div>
-        <div style="flex:1"><div style="font-size:.78rem;color:var(--danger)">${esc(u)}</div><div style="font-size:.62rem;color:var(--muted);margin-top:.12rem">Account temporarily locked due to failed login attempts</div></div>
-        ${SESSION.role==='owner'||SESSION.role==='admin'?`<button class="a-btn sm success" onclick="unlockAccount(${JSON.stringify(u)})">Unlock</button>`:''}
-      </div>`).join('');
-  }catch(e){}
-}
-window.unlockAccount=async function(targetUser){
-  try{
-    await api('POST','/api/admin/unlock',{user:SESSION.user,pass:SESSION.pass,targetUser});
-    toast(`${targetUser} unlocked`,'green');
-    renderLockouts();
-  }catch(e){toast(e.message,'red');}
-};
-
-// ── IP Bans ───────────────────────────────────────────────
-async function renderIpBans(){
-  try{
-    const bans=await fetch(`/api/admin/ip-bans?${authQ()}`).then(r=>r.json());
-    const el=document.getElementById('ip-bans-body');
-    if(!el)return;
-    if(!Array.isArray(bans)||!bans.length){el.innerHTML='<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No IPs currently banned.</div></div>';return;}
-    el.innerHTML=bans.map(b=>`
-      <div class="feed-item">
-        <div class="feed-dot red"></div>
-        <div style="flex:1">
-          <div style="font-family:monospace;font-size:.78rem;color:rgba(248,113,113,.85)">${esc(b.ip)}</div>
-          ${b.reason?`<div style="font-size:.64rem;color:var(--muted);margin-top:.1rem">${esc(b.reason)}</div>`:''}
-          <div style="font-size:.58rem;color:var(--dim);margin-top:.08rem">${esc(b.date||'')}${b.bannedBy?' · by '+esc(b.bannedBy):''}${b.expiresAt?' · expires '+new Date(b.expiresAt).toLocaleString():' · permanent'}</div>
-        </div>
-        <button class="a-btn sm success" onclick="removeIpBan(${JSON.stringify(b.ip)})">Unban</button>
-      </div>`).join('');
-  }catch(e){}
-}
-window.addIpBan=async function(){
-  const ip=document.getElementById('ban-ip').value.trim();
-  const reason=document.getElementById('ban-reason').value.trim();
-  const expiresAt=document.getElementById('ban-expires').value;
-  if(!ip){toast('Enter an IP address','red');return;}
-  try{
-    await api('POST','/api/admin/ip-bans',{user:SESSION.user,pass:SESSION.pass,ip,reason,expiresAt:expiresAt||null});
-    document.getElementById('ban-ip').value='';document.getElementById('ban-reason').value='';document.getElementById('ban-expires').value='';
-    toast(`${ip} banned`,'red');
-    renderIpBans();
-  }catch(e){toast(e.message,'red');}
-};
-window.removeIpBan=async function(ip){
-  try{
-    await api('DELETE','/api/admin/ip-bans',{user:SESSION.user,pass:SESSION.pass,ip});
-    toast(`${ip} unbanned`,'green');
-    renderIpBans();
-  }catch(e){toast(e.message,'red');}
-};
-
-// ── Active Sessions ───────────────────────────────────────
-async function renderActiveSessions(){
-  try{
-    const sessions=await fetch(`/api/admin/sessions?${authQ()}`).then(r=>r.json());
-    const el=document.getElementById('sessions-body');
-    if(!el)return;
-    if(!Array.isArray(sessions)||!sessions.length){el.innerHTML='<div class="feed-item"><div class="feed-msg" style="color:var(--dim)">No active sessions found.</div></div>';return;}
-    el.innerHTML=sessions.map(s=>`
-      <div class="feed-item">
-        <div class="feed-dot ${s.user===SESSION.user?'green':'blue'}"></div>
-        <div style="flex:1">
-          <div style="font-size:.78rem;color:var(--text)">${esc(s.user)} <span class="role-pill ${esc(s.role||'admin')}" style="margin-left:.4rem">${esc(s.role||'')}</span>${s.token===SESSION.token?'<span style="font-size:.55rem;color:rgba(110,220,150,.6);margin-left:.5rem;letter-spacing:.12em"> ← YOU</span>':''}</div>
-          <div style="font-size:.58rem;color:var(--dim);margin-top:.1rem">${esc(s.ip||'?')} · Last seen: ${esc(s.lastSeen?new Date(s.lastSeen).toLocaleString():'?')}</div>
-          <div style="font-size:.56rem;font-family:monospace;color:var(--dim);margin-top:.06rem;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((s.ua||'').slice(0,80))}</div>
-        </div>
-        ${s.token!==SESSION.token&&(SESSION.role==='owner'||SESSION.role==='admin')?`<button class="a-btn sm danger" onclick="forceLogout(${JSON.stringify(s.token)})">Force Logout</button>`:''}
-      </div>`).join('');
-  }catch(e){}
-}
-window.forceLogout=async function(token){
-  try{
-    await api('DELETE',`/api/admin/sessions/${token}`,{user:SESSION.user,pass:SESSION.pass});
-    toast('Session terminated','red');
-    renderActiveSessions();
-  }catch(e){toast(e.message,'red');}
-};
-
-// ── TOTP / 2FA ────────────────────────────────────────────
-let _totpPendingSecret='';
-async function renderTotpStatus(){
-  try{
-    // Check if user has 2FA enabled by attempting a known endpoint behavior
-    // We approximate by checking if the login log has any 2FA entries
-    // In practice we check the totp-secrets key indirectly via setup endpoint behavior
-    const el=document.getElementById('totp-status-desc');
-    const enableBtn=document.getElementById('totp-enable-btn');
-    const disableBtn=document.getElementById('totp-disable-btn');
-    if(!el)return;
-    // Try to set up — if secret already exists the server will just regenerate pending
-    // We use a lightweight GET via the settings endpoint to infer
-    el.textContent='Click "Enable 2FA" to set up an authenticator app for your account. If already enabled, disable with the button below.';
-    enableBtn.style.display='';
-    disableBtn.style.display='';
-  }catch(e){}
-}
-window.startTotpSetup=async function(){
-  try{
-    const d=await api('POST','/api/admin/totp/setup',{user:SESSION.user,pass:SESSION.pass});
-    _totpPendingSecret=d.secret;
-    document.getElementById('totp-secret-display').textContent=d.secret;
-    document.getElementById('totp-verify-input').value='';
-    document.getElementById('totp-modal-err').textContent='';
-    // Generate QR code as SVG using a simple URL-based method
-    const qrEl=document.getElementById('totp-qr');
-    qrEl.innerHTML=`<div style="background:white;padding:8px;border-radius:8px;display:inline-block"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(d.otpauthUrl)}" width="160" height="160" style="display:block" onerror="this.parentElement.innerHTML='<div style=color:#333;font-size:.7rem;padding:.5rem;text-align:center>Scan the secret manually</div>'"/></div>`;
-    document.getElementById('totp-modal').style.display='flex';
-  }catch(e){toast(e.message,'red');}
-};
-window.closeTotpModal=function(){document.getElementById('totp-modal').style.display='none';};
-window.confirmTotpSetup=async function(){
-  const token=document.getElementById('totp-verify-input').value.trim();
-  if(!token||token.length<6){document.getElementById('totp-modal-err').textContent='Enter the 6-digit code';return;}
-  try{
-    await api('POST','/api/admin/totp/verify',{user:SESSION.user,pass:SESSION.pass,token});
-    closeTotpModal();
-    toast('2FA activated — your account now requires a code at login','green');
-    renderTotpStatus();
-  }catch(e){document.getElementById('totp-modal-err').textContent=e.message||'Invalid code';}
-};
-window.disableTotp=function(){
-  showConfirm('Disable 2FA for your account? You will only need your password to log in.', async () => {
-    try{
-      await api('POST','/api/admin/totp/disable',{user:SESSION.user,pass:SESSION.pass});
-      toast('2FA disabled','yellow');
-      renderTotpStatus();
-    }catch(e){toast(e.message,'red');}
-  });
-};
-
-// ── Security Settings ─────────────────────────────────────
-async function loadSecSettings(){
-  if(SESSION.role!=='owner'){
-    const el=document.getElementById('sec-settings-block');
-    if(el){el.innerHTML='<div class="a-row"><div class="a-desc" style="color:var(--dim)">Owner access required to modify security settings.</div></div>';}
-    return;
-  }
-  try{
-    const s=await fetch(`/api/admin/security-settings?${authQ()}`).then(r=>r.json());
-    document.getElementById('sec-lockout-threshold').value=s.lockoutThreshold||5;
-    document.getElementById('sec-lockout-mins').value=s.lockoutMinutes||15;
-    document.getElementById('sec-session-timeout').value=s.sessionTimeoutMinutes||60;
-    if(SESSION) SESSION.sessionTimeoutMinutes=s.sessionTimeoutMinutes||60;
-  }catch(e){}
-}
-window.saveSecSettings=async function(){
-  if(SESSION.role!=='owner'){toast('Owner only','red');return;}
-  const btn=document.getElementById('sec-save-btn');btn.disabled=true;
-  try{
-    const payload={
-      user:SESSION.user,pass:SESSION.pass,
-      lockoutThreshold:Number(document.getElementById('sec-lockout-threshold').value),
-      lockoutMinutes:Number(document.getElementById('sec-lockout-mins').value),
-      sessionTimeoutMinutes:Number(document.getElementById('sec-session-timeout').value),
-    };
-    await api('POST','/api/admin/security-settings',payload);
-    if(SESSION) SESSION.sessionTimeoutMinutes=payload.sessionTimeoutMinutes;
-    resetAutoLogout();
-    toast('Security settings saved','green');
-  }catch(e){toast(e.message,'red');}
-  finally{btn.disabled=false;}
-};
-
-window.renderSecurity=renderSecurity;
 
 window.addEventListener('resize',()=>{if(document.getElementById('panel-views').classList.contains('active'))renderViews();});
 </script>
