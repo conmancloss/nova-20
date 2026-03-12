@@ -572,9 +572,32 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 })();
 
-// ── Broadcast Banner ────────────────────────────────────────────────────────
+// ── Broadcast Banner + Maintenance Mode ─────────────────────────────────────
 (function() {
 	var DISMISSED_KEY = 'nova:broadcast-dismissed';
+
+	// Maintenance keywords — these trigger the full-screen overlay instead of a banner
+	function isMaintenance(text) {
+		var t = text.toLowerCase();
+		return t.indexOf('maintenance') !== -1 ||
+		       t.indexOf('under maintenance') !== -1 ||
+		       text.indexOf('🔧') !== -1;
+	}
+
+	function showMaintenance(text) {
+		var overlay = document.getElementById('maintenance-overlay');
+		var msgEl   = document.getElementById('maintenance-msg');
+		if (!overlay || !msgEl) return;
+		msgEl.textContent = text;
+		overlay.style.display = 'flex';
+		// Hide the regular banner if it was showing
+		hideBanner(true);
+	}
+
+	function hideMaintenance() {
+		var overlay = document.getElementById('maintenance-overlay');
+		if (overlay) overlay.style.display = 'none';
+	}
 
 	function showBanner(text, date) {
 		var banner = document.getElementById('broadcast-banner');
@@ -582,15 +605,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!banner || !textEl) return;
 		// If user already dismissed this exact message, don't show again
 		var dismissed = localStorage.getItem(DISMISSED_KEY);
-		if (dismissed === (text + date)) return;
+		if (dismissed === (text + (date || ''))) return;
 		textEl.textContent = text;
+		banner.dataset.broadcastDate = date || '';
 		banner.style.display = 'flex';
 		// Push shell down so content isn't hidden under banner
 		var shell = document.getElementById('shell');
-		if (shell) shell.style.paddingTop = banner.offsetHeight + 'px';
+		if (shell) shell.style.paddingTop = (banner.offsetHeight || 40) + 'px';
 	}
 
-	function hideBanner() {
+	function hideBanner(skipStorage) {
 		var banner = document.getElementById('broadcast-banner');
 		if (!banner) return;
 		banner.style.display = 'none';
@@ -603,15 +627,22 @@ document.addEventListener('DOMContentLoaded', () => {
 			.then(function(r) { return r.json(); })
 			.then(function(data) {
 				if (data && data.text) {
-					showBanner(data.text, data.date || '');
+					if (isMaintenance(data.text)) {
+						hideBanner(true);
+						showMaintenance(data.text);
+					} else {
+						hideMaintenance();
+						showBanner(data.text, data.date || '');
+					}
 				} else {
-					hideBanner();
+					hideMaintenance();
+					hideBanner(true);
 				}
 			})
 			.catch(function() {});
 	}
 
-	// Wire up close button — also saves dismissal so it won't re-appear
+	// Wire up close button — saves dismissal so it won't re-appear on refresh
 	document.addEventListener('DOMContentLoaded', function() {
 		var closeBtn = document.getElementById('broadcast-banner-close');
 		if (closeBtn) {
@@ -619,9 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				var banner = document.getElementById('broadcast-banner');
 				var textEl = document.getElementById('broadcast-banner-text');
 				if (banner && textEl) {
-					// Remember this specific message was dismissed
-					var dismissed_date = banner.dataset.broadcastDate || '';
-					localStorage.setItem(DISMISSED_KEY, textEl.textContent + dismissed_date);
+					localStorage.setItem(DISMISSED_KEY, textEl.textContent + (banner.dataset.broadcastDate || ''));
 				}
 				hideBanner();
 			});
