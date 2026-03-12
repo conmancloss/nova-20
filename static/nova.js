@@ -449,6 +449,27 @@ document.addEventListener('DOMContentLoaded', () => {
 				} catch(_) {}
 			});
 
+			function showBlockOverlay(url, reason) {
+				let overlay = document.getElementById("nova-block-overlay");
+				if (!overlay) {
+					overlay = document.createElement("div");
+					overlay.id = "nova-block-overlay";
+					overlay.style.cssText = "position:absolute;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg,#0e0e10);gap:.75rem;padding:2rem;text-align:center;";
+					document.getElementById("frame-container").appendChild(overlay);
+				}
+				overlay.innerHTML = `
+					<div style="font-size:2.5rem">🚫</div>
+					<div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.14em;color:var(--text,#d4d4d8)">ACCESS BLOCKED</div>
+					<div style="font-size:.78rem;color:var(--muted,#71717a);max-width:320px;line-height:1.6">${reason ? reason : "This URL has been blocked by an administrator."}</div>
+					<div style="font-size:.66rem;color:var(--dim,#52525b);font-family:monospace;margin-top:.2rem">${url}</div>`;
+				overlay.style.display = "flex";
+			}
+
+			function hideBlockOverlay() {
+				const overlay = document.getElementById("nova-block-overlay");
+				if (overlay) overlay.style.display = "none";
+			}
+
 			function uvNavigate(url) {
 				if (!url) return;
 				// ── Check blocked list before navigating ──────────────────
@@ -463,17 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (hit) {
 						hideLoading();
 						urlBar.value = url;
-						document.getElementById("frame-container").innerHTML =
-							`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:.75rem;padding:2rem;text-align:center;">
-								<div style="font-size:2.5rem">🚫</div>
-								<div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.14em;color:var(--text)">ACCESS BLOCKED</div>
-								<div style="font-size:.78rem;color:var(--muted);max-width:320px;line-height:1.5">${hit.reason ? hit.reason : "This URL has been blocked by an administrator."}</div>
-								<div style="font-size:.66rem;color:var(--dim);font-family:monospace;margin-top:.3rem">${url}</div>
-							</div>`;
+						showBlockOverlay(url, hit.reason);
 						return;
 					}
 				}
-				// ─────────────────────────────────────────────────────────
+				hideBlockOverlay();
 				showLoading();
 				urlBar.value = url;
 				window.history.pushState({ proxyUrl: url }, "", "?q=" + encodeURIComponent(url));
