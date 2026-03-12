@@ -339,10 +339,17 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
 
       <div class="a-section">Publish New Broadcast</div>
       <div class="a-block">
+        <div class="a-row">
+          <div><div class="a-label">Broadcast Type</div><div class="a-desc">Normal shows a dismissible top banner. Maintenance blocks the entire site with a full-screen overlay until cleared.</div></div>
+          <div style="display:flex;gap:.4rem;">
+            <button class="a-btn primary" id="bc-type-normal" onclick="setBcType(this,'normal')">&#128226; Normal</button>
+            <button class="a-btn" id="bc-type-maintenance" onclick="setBcType(this,'maintenance')">&#128296; Maintenance</button>
+          </div>
+        </div>
         <div class="a-row" style="flex-direction:column;align-items:flex-start;gap:.75rem;">
           <div style="width:100%">
             <div class="a-label">Message</div>
-            <div class="a-desc">Shown as a banner across the top of Nova for every visitor (max 300 chars)</div>
+            <div class="a-desc" id="bc-type-hint">Shown as a dismissible banner at the top of Nova for every visitor (max 300 chars)</div>
             <textarea class="a-textarea" id="bc-text" placeholder="Type your announcement…" maxlength="300" oninput="bcPreviewUpdate()"></textarea>
             <div class="bc-preview" id="bc-preview"></div>
           </div>
@@ -355,7 +362,7 @@ body::before{content:"";position:fixed;inset:0;background-image:url("data:image/
 
       <div class="a-section">Quick Templates</div>
       <div class="a-block">
-        <div class="a-row"><div><div class="a-label">🔧 Maintenance</div></div><button class="a-btn sm" onclick="bcUseTemplate('🔧 Nova is undergoing maintenance. Some features may be temporarily unavailable.')">Use</button></div>
+        <div class="a-row"><div><div class="a-label">🔧 Maintenance</div></div><button class="a-btn sm" onclick="bcUseTemplate('🔧 Nova is currently under maintenance. We'll be back shortly — thank you for your patience.')">Use</button></div>
         <div class="a-row"><div><div class="a-label">🎉 Update</div></div><button class="a-btn sm" onclick="bcUseTemplate('🎉 Nova has been updated! Enjoy new features and improvements.')">Use</button></div>
         <div class="a-row"><div><div class="a-label">⚠️ Notice</div></div><button class="a-btn sm" onclick="bcUseTemplate('⚠️ Please use Nova responsibly. Misuse may result in access being revoked.')">Use</button></div>
         <div class="a-row"><div><div class="a-label">🎮 New Games</div></div><button class="a-btn sm" onclick="bcUseTemplate('🎮 New games added to the library! Head to the Games tab to check them out.')">Use</button></div>
@@ -709,14 +716,44 @@ function updateBcActiveUI(bc){
   }else{label.textContent='No active broadcast';desc.textContent='Publish below to display a banner on Nova for all visitors';btn.style.display='none';}
 }
 
+let _bcType = 'normal';
+window.setBcType=function(btn,type){
+  _bcType=type;
+  document.getElementById('bc-type-normal').classList.toggle('primary',type==='normal');
+  document.getElementById('bc-type-maintenance').classList.toggle('primary',type==='maintenance');
+  const hint=document.getElementById('bc-type-hint');
+  if(hint) hint.textContent=type==='maintenance'?
+    '🔧 MAINTENANCE MODE: This will block the entire Nova site with a full-screen overlay. Use when doing server work.':
+    'Shown as a dismissible banner at the top of Nova for every visitor (max 300 chars)';
+  bcPreviewUpdate();
+};
 window.bcPreviewUpdate=function(){
   const t=document.getElementById('bc-text').value.trim(),p=document.getElementById('bc-preview');
-  if(t){p.textContent='📢 '+t;p.classList.add('on');}else p.classList.remove('on');
+  if(t){
+    const prefix=_bcType==='maintenance'?'🔧 MAINTENANCE: ':'📢 ';
+    p.textContent=prefix+t;
+    p.style.borderColor=_bcType==='maintenance'?'rgba(248,113,113,.3)':'rgba(251,191,36,.18)';
+    p.style.background=_bcType==='maintenance'?'rgba(248,113,113,.06)':'rgba(251,191,36,.06)';
+    p.style.color=_bcType==='maintenance'?'rgba(248,113,113,.85)':'rgba(251,191,36,.85)';
+    p.classList.add('on');
+  }else p.classList.remove('on');
 };
-window.bcUseTemplate=function(text){document.getElementById('bc-text').value=text;bcPreviewUpdate();toast('Template loaded');};
+window.bcUseTemplate=function(text){
+  document.getElementById('bc-text').value=text;
+  // Auto-detect maintenance type from template
+  const isMaint=text.toLowerCase().indexOf('maintenance')!==-1||text.indexOf('🔧')!==-1;
+  setBcType(null,isMaint?'maintenance':'normal');
+  bcPreviewUpdate();
+  toast('Template loaded');
+};
 window.publishBroadcast=async function(){
-  const text=document.getElementById('bc-text').value.trim();
-  if(!text){toast('Write a message first','red');return;}
+  const rawText=document.getElementById('bc-text').value.trim();
+  if(!rawText){toast('Write a message first','red');return;}
+  // For maintenance type, prepend the emoji if not already present
+  let text=rawText;
+  if(_bcType==='maintenance'&&text.indexOf('🔧')===-1&&text.toLowerCase().indexOf('maintenance')===-1){
+    text='🔧 '+text;
+  }
   const btn=document.getElementById('bc-publish-btn');btn.disabled=true;btn.textContent='Publishing…';
   try{
     await api('POST','/api/broadcast',{user:SESSION.user,pass:SESSION.pass,text});
