@@ -283,7 +283,7 @@ app.post("/api/admin/password", async (req, res) => {
   try {
     const { user, pass, newPass } = req.body || {};
     const admins = await kget("nova:admins") || [];
-    const me = admins.find(a => a.user === user && a.pass === pass && a.role === "owner");
+    const me = admins.find(a => a.user === user && a.pass === pass);
     if (!me) return res.status(401).json({ error: "Unauthorized" });
     if (!newPass || newPass.length < 4) return res.status(400).json({ error: "Password too short (min 4)" });
     me.pass = newPass;
