@@ -95,10 +95,13 @@ app.get("/sw.js", (_req, res, next) => {
 // ══════════════════════════════════════════════════════════════════════════════
 //  UPSTASH REDIS  — persistent storage that works on Vercel
 //  Keys used:
-//    nova:admins          → JSON array of admin accounts (passwords included)
-//    nova:activity        → JSON array of last 100 activity log entries
-//    nova:views:total     → integer, all-time page view count
+//    nova:admins               → JSON array of admin accounts (passwords included)
+//    nova:activity             → JSON array of last 100 activity log entries
+//    nova:views:total          → integer, all-time page view count
 //    nova:views:day:YYYY-MM-DD → integer, views for that specific day
+//    nova:broadcast            → { text, date, publishedBy } | null
+//    nova:broadcast-history    → JSON array of last 50 broadcast/block entries
+//    nova:blocked              → JSON array of { url, reason, date, blockedBy }
 // ══════════════════════════════════════════════════════════════════════════════
 const REDIS_URL   = process.env.UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -318,6 +321,137 @@ app.post("/api/admin/factory-reset", async (req, res) => {
     await appendActivity({ msg: "Factory reset by " + user, color: "red" });
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Broadcast / Announcement ──────────────────────────────────────────────────
+//  nova:broadcast → { text, date, publishedBy } | null
+
+// Public — any visitor polls this to show the banner
+app.get("/api/broadcast", async (_req, res) => {
+  try {
+    const msg = await kget("nova:broadcast");
+    res.setHeader("Cache-Control", "no-store");
+    res.json(msg || { text: "", date: "", publishedBy: "" });
+  } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
+});
+
+// Admin — publish a new announcement
+app.post("/api/broadcast", async (req, res) => {
+  try {
+    const { user, pass, text } = req.body || {};
+    const admins = await kget("nova:admins") || [];
+    const me = admins.find(a => a.user === user && a.pass === pass);
+    if (!me) return res.status(401).json({ error: "Unauthorized" });
+    if (typeof text !== "string") return res.status(400).json({ error: "text required" });
+    const trimmed = text.trim().slice(0, 300);
+    if (trimmed) {
+      const entry = { text: trimmed, date: todayStr(), publishedBy: user };
+      await kset("nova:broadcast", entry);
+      // Keep a history log (last 20)
+      const hist = (await kget("nova:broadcast-history")) || [];
+      hist.unshift({ ...entry, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) });
+      if (hist.length > 20) hist.length = 20;
+      await kset("nova:broadcast-history", hist);
+      await appendActivity({ msg: `Broadcast published by ${user}: "${trimmed.slice(0,60)}${trimmed.length>60?"…":""}"`, color: "yellow" });
+    } else {
+      await redis("DEL", "nova:broadcast");
+      await appendActivity({ msg: `Broadcast cleared by ${user}`, color: "yellow" });
+    }
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin — get broadcast history
+app.get("/api/broadcast/history", async (req, res) => {
+  try {
+    const { user, pass } = req.query;
+    const admins = await kget("nova:admins") || [];
+    if (!admins.find(a => a.user === user && a.pass === pass))
+      return res.status(401).json({ error: "Unauthorized" });
+    res.setHeader("Cache-Control", "no-store");
+    res.json((await kget("nova:broadcast-history")) || []);
+  } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
+});
+
+// ── Blocked URLs ──────────────────────────────────────────────────────────────
+//  nova:blocked → JSON array of { url, reason, date, blockedBy }
+//  Public GET so the client-side proxy can check before navigating
+
+// Public — client polls this before any proxy navigation
+app.get("/api/blocked", async (_req, res) => {
+  try {
+    const list = (await kget("nova:blocked")) || [];
+    res.setHeader("Cache-Control", "no-store");
+    // Only send url + reason to the public (no admin metadata)
+    res.json(list.map(b => ({ url: b.url, reason: b.reason || "" })));
+  } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
+});
+
+// Admin — add a blocked URL
+app.post("/api/blocked", async (req, res) => {
+  try {
+    const { user, pass, url, reason } = req.body || {};
+    const admins = await kget("nova:admins") || [];
+    const me = admins.find(a => a.user === user && a.pass === pass);
+    if (!me) return res.status(401).json({ error: "Unauthorized" });
+    if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
+    const cleanUrl = url.trim().toLowerCase().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+    if (!cleanUrl) return res.status(400).json({ error: "Invalid URL" });
+    const list = (await kget("nova:blocked")) || [];
+    if (list.find(b => b.url === cleanUrl)) return res.status(409).json({ error: "Already blocked" });
+    const entry = {
+      url: cleanUrl,
+      reason: (reason || "").trim().slice(0, 100),
+      date: todayStr(),
+      blockedBy: user,
+    };
+    list.push(entry);
+    await kset("nova:blocked", list);
+    // Also log in activity
+    await appendActivity({ msg: `URL blocked by ${user}: ${cleanUrl}${entry.reason ? ` (${entry.reason})` : ""}`, color: "red" });
+    // Announce via broadcast history so it's visible in admin
+    const bHist = (await kget("nova:broadcast-history")) || [];
+    bHist.unshift({
+      text: `🚫 URL blocked: ${cleanUrl}${entry.reason ? " — " + entry.reason : ""}`,
+      date: todayStr(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      publishedBy: user,
+      type: "block",
+    });
+    if (bHist.length > 50) bHist.length = 50;
+    await kset("nova:broadcast-history", bHist);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin — remove a blocked URL
+app.delete("/api/blocked", async (req, res) => {
+  try {
+    const { user, pass, url } = req.body || {};
+    const admins = await kget("nova:admins") || [];
+    if (!admins.find(a => a.user === user && a.pass === pass))
+      return res.status(401).json({ error: "Unauthorized" });
+    const cleanUrl = (url || "").trim().toLowerCase().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+    let list = (await kget("nova:blocked")) || [];
+    const before = list.length;
+    list = list.filter(b => b.url !== cleanUrl);
+    if (list.length === before) return res.status(404).json({ error: "URL not found in block list" });
+    await kset("nova:blocked", list);
+    await appendActivity({ msg: `URL unblocked by ${user}: ${cleanUrl}`, color: "green" });
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin — get full blocked list with metadata
+app.get("/api/blocked/admin", async (req, res) => {
+  try {
+    const { user, pass } = req.query;
+    const admins = await kget("nova:admins") || [];
+    if (!admins.find(a => a.user === user && a.pass === pass))
+      return res.status(401).json({ error: "Unauthorized" });
+    res.setHeader("Cache-Control", "no-store");
+    res.json((await kget("nova:blocked")) || []);
+  } catch (e) { res.status(500).json({ error: "Storage unavailable" }); }
 });
 
 // ── Static files ──────────────────────────────────────────────────────────────
