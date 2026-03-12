@@ -700,21 +700,26 @@ async function login() {
   document.getElementById('l-err').textContent='';
   document.getElementById('l-submit').textContent='...';
   try {
-    const body = {user,pass};
-    if(totpToken) body.totpToken=totpToken;
-    const d=await api('POST','/api/admin/login',body);
-    if(d.requires2fa){
-      // Show 2FA step
-      _pendingTwoFaUser=user; _pendingTwoFaPass=pass;
-      document.getElementById('l-credentials').style.display='none';
-      document.getElementById('l-2fa-section').style.display='';
-      document.getElementById('l-2fa-back').style.display='block';
-      document.getElementById('l-submit').textContent='Verify';
-      document.getElementById('l-totp').focus();
-      return;
+    const body = {user, pass};
+    if (totpToken) body.totpToken = totpToken;
+    // Use raw fetch so we can read the response body even on 401 (for requires2fa flag)
+    const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) {
+      if (d.requires2fa) {
+        // Show 2FA step
+        _pendingTwoFaUser=user; _pendingTwoFaPass=pass;
+        document.getElementById('l-credentials').style.display='none';
+        document.getElementById('l-2fa-section').style.display='';
+        document.getElementById('l-2fa-back').style.display='block';
+        document.getElementById('l-submit').textContent='Verify';
+        document.getElementById('l-totp').focus();
+        return;
+      }
+      throw new Error(d.error || 'Login failed');
     }
-    SESSION={user,pass,role:d.role,token:d.sessionToken};
-    _pendingTwoFaUser=null;_pendingTwoFaPass=null;
+    SESSION={user, pass, role:d.role, token:d.sessionToken};
+    _pendingTwoFaUser=null; _pendingTwoFaPass=null;
     cancelTwoFa();
     document.getElementById('lock').style.display='none';
     document.getElementById('admin-shell').classList.add('visible');
@@ -724,14 +729,14 @@ async function login() {
     startSessionTracking();
     renderOverview();
   } catch(e) {
-    if(!_pendingTwoFaUser){
+    if (!_pendingTwoFaUser) {
       ['l-user','l-pass'].forEach(id=>{const el=document.getElementById(id);el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);});
+      document.getElementById('l-pass').value='';
     } else {
       const el=document.getElementById('l-totp');el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);
+      document.getElementById('l-totp').value='';
     }
     document.getElementById('l-err').textContent=e.message||'Login failed';
-    if(!_pendingTwoFaUser) document.getElementById('l-pass').value='';
-    else document.getElementById('l-totp').value='';
   } finally { document.getElementById('l-submit').textContent=_pendingTwoFaUser?'Verify':'Enter'; }
 }
 
