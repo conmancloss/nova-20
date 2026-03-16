@@ -285,7 +285,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	fsBtn.addEventListener("click", () => {
 		if (isFullscreen) { exitFullscreen(); } else { enterFullscreen(); }
-	})
+	});
+
+	// Floating exit button inside frame-container (semi-transparent overlay)
+	const fsExitBtn = document.getElementById("fs-exit-btn");
+	if (fsExitBtn) fsExitBtn.addEventListener("click", () => exitFullscreen());
 
 	// ── Games ──────────────────────────────────────────────────────
 	let _allGames = [];
