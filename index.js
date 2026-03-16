@@ -1003,6 +1003,33 @@ app.get("/api/blocked/admin", async (req, res) => {
 });
 
 // ── Settings ──────────────────────────────────────────────────────────────────
+// ── Info / Version ────────────────────────────────────────────────────────────
+// Public — serves static info.json but overrides version from DB if set
+app.get("/api/info", async (_req, res) => {
+  try {
+    const staticInfo = JSON.parse(fs.readFileSync(path.join(__dirname, "static", "info.json"), "utf8"));
+    const dbVersion = await kget("nova:version");
+    if (dbVersion) staticInfo.version = dbVersion;
+    res.setHeader("Cache-Control", "no-store");
+    res.json(staticInfo);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin — update version number stored in DB
+app.post("/api/admin/version", async (req, res) => {
+  try {
+    const me = await authAdmin(req);
+    if (!me || me.role !== "owner") return res.status(401).json({ error: "Unauthorized" });
+    const { version } = req.body || {};
+    if (!version || typeof version !== "string") return res.status(400).json({ error: "version string required" });
+    const trimmed = version.trim().slice(0, 50);
+    if (!trimmed) return res.status(400).json({ error: "version cannot be empty" });
+    await kset("nova:version", trimmed);
+    appendActivity({ msg: `Version updated to ${trimmed} by ${me.user}`, color: "blue" }).catch(() => {});
+    res.json({ ok: true, version: trimmed });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get("/api/admin/settings", async (req, res) => {
   try {
     const me = await authAdmin(req, true);
