@@ -151,15 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			'<iframe src="' + base + '" allowfullscreen></iframe>' +
 			'</body></html>';
 
-		const blob = new Blob([html], { type: 'text/html' });
-		const blobURL = URL.createObjectURL(blob);
-		const w = window.open(blobURL, '_blank');
+		const w = window.open('about:blank', '_blank');
 		if (w) {
-			setTimeout(() => URL.revokeObjectURL(blobURL), 5000);
+			w.document.open();
+			w.document.write(html);
+			w.document.close();
 			// Replace this tab's URL with Google Classroom so the origin isn't visible
 			window.location.replace("https://classroom.google.com");
-		} else {
-			URL.revokeObjectURL(blobURL);
 		}
 	})();
 
