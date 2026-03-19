@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crossy Road Tournament</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash-screen">
+  <div class="splash-inner">
+    <img class="splash-logo" src="data:image/webp;base64,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" alt="Crossy Road"/>
+    <h1 class="splash-title">CROSSY ROAD<br><span>TOURNAMENT</span></h1>
+    <div class="splash-loader"><div class="splash-bar"></div></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <!-- NOVA SPONSOR BANNER -->
+  <div id="nova-banner">
+    <div class="nova-inner">
+      <span class="nova-badge">SPONSORED BY</span>
+      <div class="nova-logo">
+        <img src="favicon.svg" alt="Nova" class="nova-svg"/>
+        <span class="nova-name">NOVA</span>
+      </div>
+      <div class="nova-divider"></div>
+      <span class="nova-tagline">Game On. Level Up.</span>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div class="nav-brand">
+      <img class="nav-cr-logo" src="data:image/webp;base64,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" alt="Crossy Road"/>
+      <span class="nav-title">CROSSY TOURNAMENT</span>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" id="btn-home"       onclick="showPage('home')">🏆 Bracket</button>
+      <button class="nav-btn" id="btn-leaderboard" onclick="showPage('leaderboard')">📊 Stats</button>
+      <button class="nav-btn" id="btn-history"    onclick="showPage('history')">📋 History</button>
+      <button class="nav-btn" id="btn-settings"   onclick="showPage('settings')">⚙︎ Settings</button>
+
+    </div>
+  </nav>
+
+  <!-- ══ HOME ══ -->
+  <div id="page-home" class="page active">
+    <div class="page-header">
+      <h2 class="page-title">TOURNAMENT BRACKET</h2>
+      <div class="header-right">
+        <div class="tournament-meta" id="tournament-meta"></div>
+        <button class="icon-btn" onclick="undoLastAction()" title="Undo last action" id="undo-btn">↩ Undo</button>
+        <button class="icon-btn" onclick="printBracket()" title="Print Bracket">🖨 Print</button>
+      </div>
+    </div>
+    <div id="checkin-bar" class="checkin-bar hidden">
+      <span class="checkin-label">⚡ Check-in Mode</span>
+      <div id="checkin-list"></div>
+      <button class="btn-primary btn-sm" onclick="toggleCheckin()">Done</button>
+    </div>
+    <div id="bracket-container">
+      <div id="bracket-empty" class="empty-state">
+        <img class="empty-logo" src="data:image/webp;base64,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" alt="Crossy Road"/>
+        <h3>No Tournament Yet!</h3>
+        <p>Configure in <strong>Settings</strong>, then add teams with the <strong>+</strong> button.</p>
+      </div>
+      <div id="bracket-scroll">
+        <div id="bracket-board"></div>
+      </div>
+    </div>
+    <button class="fab" id="fab-add" onclick="openAddTeamModal()" title="Add Team">+</button>
+    <button class="fab-secondary" id="fab-checkin" onclick="toggleCheckin()" title="Check-in Teams">✓</button>
+  </div>
+
+  <!-- ══ LEADERBOARD ══ -->
+  <div id="page-leaderboard" class="page">
+    <div class="page-header">
+      <h2 class="page-title">📊 LEADERBOARD</h2>
+      <div class="tournament-meta" id="lb-meta">All-time stats</div>
+    </div>
+    <div id="leaderboard-content"></div>
+  </div>
+
+  <!-- ══ HISTORY ══ -->
+  <div id="page-history" class="page">
+    <div class="page-header">
+      <h2 class="page-title">📋 MATCH HISTORY</h2>
+    </div>
+    <div id="history-content"></div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div id="page-settings" class="page">
+    <div class="page-header">
+      <h2 class="page-title">⚙︎ SETTINGS</h2>
+    </div>
+    <div class="glass-card">
+      <h3 class="card-title">Tournament Configuration</h3>
+      <div class="form-group"><label>Tournament Name</label><input type="text" id="setting-name" placeholder="Crossy Road Cup 2025"/></div>
+      <div class="form-group">
+        <label>Number of Teams</label>
+        <select id="setting-teams">
+          <option value="4">4 Teams</option>
+          <option value="8" selected>8 Teams</option>
+          <option value="16">16 Teams</option>
+          <option value="32">32 Teams</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Tournament Date</label><input type="date" id="setting-date"/></div>
+      <div class="form-group"><label>Location / Venue</label><input type="text" id="setting-location" placeholder="e.g. Community Hall"/></div>
+      <div class="form-group">
+        <label>Match Timer (seconds, 0 = no timer)</label>
+        <input type="number" id="setting-timer" min="0" max="600" value="0" placeholder="e.g. 120"/>
+      </div>
+      <div class="settings-actions">
+        <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+        <button class="btn-danger"  onclick="confirmReset()">↺ Reset Tournament</button>
+      </div>
+      <div id="settings-saved-msg" class="save-msg hidden">✅ Settings saved!</div>
+    </div>
+    <div class="glass-card">
+      <h3 class="card-title">Team Roster</h3>
+      <div id="team-roster-list"></div>
+      <button class="btn-secondary mt-8" onclick="openAddTeamModal()">+ Add Team</button>
+    </div>
+
+    <div class="glass-card">
+      <h3 class="card-title">About</h3>
+      <p class="about-text">🐔 Crossy Road Tournament Manager v5<br>Leaderboard · History · Timers · Sound · Confetti · Undo · Check-in · Print</p>
+    </div>
+  </div>
+
+  <!-- ══ GAME ══ -->
+  <div id="page-game" class="page">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('home')">‹ Back</button>
+      <h2 class="page-title" id="game-page-title">MATCH</h2>
+      <div class="round-chip" id="game-round-badge"></div>
+    </div>
+
+    <!-- Timer -->
+    <div id="match-timer-wrap" class="match-timer-wrap hidden">
+      <div id="match-timer-display" class="match-timer-display">0:00</div>
+      <div class="timer-controls">
+        <button class="btn-secondary btn-sm" onclick="startTimer()">▶ Start</button>
+        <button class="btn-secondary btn-sm" onclick="pauseTimer()">⏸ Pause</button>
+        <button class="btn-secondary btn-sm" onclick="resetTimer()">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="game-scoreboard glass-card-flat">
+      <div class="team-score-panel" id="score-panel-a">
+        <div class="rank-chip" id="rank-a"></div>
+        <div class="team-name" id="score-name-a">Team A</div>
+        <div class="score-display" id="score-val-a">0</div>
+        <div class="score-label">POINTS</div>
+      </div>
+      <div class="vs-col">
+        <div class="vs-text">VS</div>
+        <img class="vs-cr" src="data:image/webp;base64,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" alt="CR"/>
+      </div>
+      <div class="team-score-panel" id="score-panel-b">
+        <div class="rank-chip" id="rank-b"></div>
+        <div class="team-name" id="score-name-b">Team B</div>
+        <div class="score-display" id="score-val-b">0</div>
+        <div class="score-label">POINTS</div>
+      </div>
+    </div>
+
+    <div class="winner-banner hidden" id="winner-banner">🏆 <span id="winner-name"></span> WINS!</div>
+
+    <div class="glass-card">
+      <h3 class="card-title">Add Points</h3>
+      <div class="score-entry-row">
+        <div class="score-entry-group"><label id="entry-label-a">Team A</label><input type="number" id="entry-pts-a" min="0" value="0"/></div>
+        <div class="score-sep">—</div>
+        <div class="score-entry-group"><label id="entry-label-b">Team B</label><input type="number" id="entry-pts-b" min="0" value="0"/></div>
+      </div>
+      <div class="score-entry-actions">
+        <button class="btn-secondary" onclick="clearScoreEntry()">Clear</button>
+        <button class="btn-primary"   onclick="confirmScoreEntry()">✔ Confirm Points</button>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <h3 class="card-title">Match Notes</h3>
+      <textarea id="match-notes" placeholder="Add notes about this match..." rows="3"></textarea>
+      <button class="btn-secondary btn-sm mt-8" onclick="saveMatchNotes()">Save Notes</button>
+    </div>
+
+    <div class="game-actions">
+      <button class="btn-warning"    onclick="setWinnerManually()">🏆 Declare Winner</button>
+      <button class="btn-danger-sm"  onclick="resetGameScore()">↺ Reset Score</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+</div>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;"></canvas>
+
+<!-- MODALS -->
+<div id="modal-add-team" class="modal-overlay hidden">
+  <div class="modal glass-modal">
+    <div class="modal-header"><h3>Add Team</h3><button class="modal-close" onclick="closeModal('modal-add-team')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Team Name</label><input type="text" id="new-team-name" placeholder="Enter team name…" maxlength="30"/></div>
+      <div class="form-group"><label>Seed / Rank <span class="opt">(optional)</span></label><input type="number" id="new-team-seed" placeholder="e.g. 1" min="1" max="32"/></div>
+      <div class="form-group"><label>Team Emoji <span class="opt">(optional)</span></label><input type="text" id="new-team-emoji" placeholder="🐔" maxlength="2"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-add-team')">Cancel</button>
+      <button class="btn-primary"   onclick="addTeam()">Add Team</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-reset" class="modal-overlay hidden">
+  <div class="modal modal-sm glass-modal">
+    <div class="modal-header"><h3>⚠ Reset Tournament</h3><button class="modal-close" onclick="closeModal('modal-reset')">✕</button></div>
+    <div class="modal-body"><p class="modal-body-text">This will <strong>delete all teams, scores, and bracket data</strong>. Are you sure?</p></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-reset')">Cancel</button>
+      <button class="btn-danger"    onclick="resetTournament()">Yes, Reset</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-winner" class="modal-overlay hidden">
+  <div class="modal modal-sm glass-modal">
+    <div class="modal-header"><h3>🏆 Declare Winner</h3><button class="modal-close" onclick="closeModal('modal-winner')">✕</button></div>
+    <div class="modal-body">
+      <p class="modal-body-text" style="margin-bottom:1.2rem;">Who wins this match?</p>
+      <div class="winner-choice">
+        <button class="btn-primary" id="modal-winner-a" onclick="declareWinner('a')"></button>
+        <button class="btn-blue"    id="modal-winner-b" onclick="declareWinner('b')"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
