@@ -11,6 +11,11 @@
     "image": "/assets/media/icons/mc.webp"
   },
   {
+    "name": "Speed stars",
+    "url": "https://epicfreegames78.github.io/speed-stars/",
+    "image": "/assets/media/icons/speedstars.png"
+  },
+  {
     "name": "Funny Shooter 2",
     "url": "https://html5.gamedistribution.com/rvvASMiM/a1b7ac4025214a5cb0bd01a4f675513a/index.html?gd_sdk_referrer_url=https%3A%2F%2Fsay.games%2Fen%2Faction%2Ffunny-shooter-2%2F&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3NheS5nYW1lcy9lbi9hY3Rpb24vZnVubnktc2hvb3Rlci0yLyIsInBhcmVudERvbWFpbiI6InNheS5nYW1lcyIsInRvcERvbWFpbiI6InNheS5nYW1lcyIsImhhc0ltcHJlc3Npb24iOnRydWUsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTgifQ%253D%253D",
     "image": "/assets/media/icons/funnyshooter2.png"
