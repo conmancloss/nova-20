@@ -6,6 +6,12 @@
     "blank": true
   },
   {
+    "name": "GTA Vice City",
+    "url": "Games/gtavicecity.html",
+    "image": "/assets/media/icons/request.webp",
+    "blank": true
+  },
+  {
     "name": "Minecraft 1.12.2 Void",
     "url": "https://avoids.surge.sh/game.html",
     "image": "/assets/media/icons/mc.webp"
