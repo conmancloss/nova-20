@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+  <base href="https://cdn.jsdelivr.net/gh/web-ports/vice-city@796678be4ed26a13c1256be98781ca9b90beb981/">
+  <meta charset="utf-8">
+  <title>Vice City</title>
+  <style>
+    body { margin:0; background:#000; overflow:hidden; }
+    canvas { width:100vw; height:100vh; display:block; }
+    #loading {
+      position:fixed;
+      top:20px;
+      left:50%;
+      transform:translateX(-50%);
+      color:#fff;
+      font-family:sans-serif;
+      font-size:18px;
+      background:rgba(0,0,0,.6);
+      padding:8px 12px;
+      border-radius:8px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">Loading...</div>
+<canvas id="canvas"></canvas>
+
+<script>
+const loadingText = document.getElementById('loading');
+let loadedBytes = 0;
+
+// ⚡ SIMPLE CACHE (localStorage + Cache API)
+const CACHE_NAME = "vc-cache-v1";
+
+async function fetchCached(url){
+  const cache = await caches.open(CACHE_NAME);
+  let res = await cache.match(url);
+  if(res) return res.arrayBuffer();
+
+  const response = await fetch(url);
+  const clone = response.clone();
+  cache.put(url, clone);
+
+  const reader = response.body.getReader();
+  let chunks = [], received = 0;
+
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    chunks.push(value);
+    received += value.length;
+    loadedBytes += value.length;
+
+    loadingText.textContent =
+      "Loading " + (loadedBytes/1024/1024).toFixed(1) + " MB";
+  }
+
+  let buffer = new Uint8Array(received);
+  let offset = 0;
+  for(let c of chunks){
+    buffer.set(c, offset);
+    offset += c.length;
+  }
+
+  return buffer.buffer;
+}
+
+// ⚡ PARALLEL MERGE
+async function merge(parts){
+  const buffers = await Promise.all(parts.map(fetchCached));
+  return URL.createObjectURL(new Blob(buffers));
+}
+
+function parts(name, count){
+  return Array.from({length:count}, (_,i)=> name+".part"+(i+1));
+}
+
+(async () => {
+
+  // 🚫 REMOVED RADIO STATIONS (huge size savings)
+  const files = {
+    index: await merge(parts("index.data", 7)),
+    // KEEP ONLY 1–2 small audio sets
+    kchat: await merge(parts("audio/kchat.adf", 3)),
+  };
+
+  const origFetch = window.fetch;
+
+  window.fetch = (input, init) => {
+    let url = String(input).toLowerCase();
+
+    if(url.includes("index.data")) return origFetch(files.index);
+    if(url.includes("kchat.adf")) return origFetch(files.kchat);
+
+    // block unused audio (prevents download)
+    if(url.includes(".adf")) return new Response(new ArrayBuffer(0));
+
+    return origFetch(input, init);
+  };
+
+  // 🚀 LOAD GAME CORE
+  ["game.js"].forEach(src => {
+    let s = document.createElement("script");
+    s.src = src;
+    document.body.appendChild(s);
+  });
+
+  loadingText.remove();
+
+})();
+</script>
+
+</body>
+</html>
