@@ -6,16 +6,15 @@
     "blank": true
   },
   {
-    "name": "GTA Vice City",
-    "url": "/games/gtavicecity.html",
-    "image": "/assets/media/icons/request.webp",
-    "blank": true
-  },
-  {
     "name": "Minecraft 1.12.2 Void",
     "url": "https://avoids.surge.sh/game.html",
     "image": "/assets/media/icons/mc.webp"
-  },
+  }, 
+   {
+    "name": "StickWAR",
+    "url": "https://files.silvergames.com/flash/ruffle/player.php?id=382",
+    "image": "/assets/media/icons/Stickwar.png"
+  }, 
   {
     "name": "Speed stars",
     "url": "https://epicfreegames78.github.io/speed-stars/",
