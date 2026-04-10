@@ -10,7 +10,9 @@
     "start": "node index.js",
     "format": "pnpm biome format --write .",
     "precommit": "pnpm run format && pnpm biome check --write .",
-    "lint": "biome lint --write ."
+    "lint": "biome lint --write .",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "author": "Nova",
   "license": "GPL-3.0-or-later",
@@ -27,7 +29,8 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.2"
+    "@biomejs/biome": "2.2.2",
+    "wrangler": "^4.81.1"
   },
   "packageManager": "pnpm@9.10.0"
 }
