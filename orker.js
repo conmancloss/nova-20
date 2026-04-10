@@ -1,5 +1,5 @@
 export default {
   async fetch(request, env) {
-    return fetch(request);
+    return env.ASSETS.fetch(request);
   }
 };
